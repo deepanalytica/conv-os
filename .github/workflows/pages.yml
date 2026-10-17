@@ -26,6 +26,10 @@ jobs:
           test -f public/index.html
           test -f public/app.js
           test -f public/styles.css
+          test -f public/premium.css
+          test -f public/landing/index.html
+          test -f public/landing/landing.css
+          test -f public/landing/landing.js
           touch public/.nojekyll
       - uses: actions/configure-pages@v5
         with:
