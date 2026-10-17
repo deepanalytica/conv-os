@@ -103,6 +103,18 @@ function action(o){
  if(next[o.status])return `<button class="btn tiny" data-action="status" data-id="${escape(o.id)}" data-next="${next[o.status]}">Avanzar →</button>`;
  return '';
 }
+
+function inboxDemo(){
+ const selected=state.orders.find(o=>o.id===state.chatOrder)||state.orders[0];
+ const product=selected?state.products.find(p=>p.id===selected.items?.[0]?.productId):null;
+ const moneyText=selected?pesos(selected.total_cents):'—';
+ const paid=Boolean(selected?.verified_at);
+ const stage=selected?(labels[selected.status]||selected.status):'Sin operación';
+ const rows=state.orders.map(o=>'<button class="inbox-person '+(selected?.id===o.id?'selected':'')+'" data-chat-order="'+escape(o.id)+'"><span class="inbox-initial">'+escape(o.customer.slice(0,1).toUpperCase())+'</span><span class="inbox-person-copy"><strong>'+escape(o.customer)+'</strong><small>'+escape(state.products.find(p=>p.id===o.items?.[0]?.productId)?.name||'Consulta comercial')+'</small></span><span class="inbox-dot">●</span></button>').join('');
+ const chat=selected?'<div class="chat-msg inbound">Hola, ¿tienen disponible '+escape(product?.name||'este producto')+'?</div><div class="chat-msg outbound">¡Hola! Te ayudo con tu pedido. ¿Cuántas unidades necesitas?</div><div class="chat-msg inbound">Quiero '+escape(selected.items?.[0]?.qty||1)+', por favor.</div><div class="chat-msg outbound chat-order"><span>RESUMEN DE OPERACIÓN</span><strong>'+escape(product?.name||'Pedido / servicio')+'</strong><b>'+moneyText+'</b><em>'+(paid?'✓ Pago de DEMO confirmado':'◷ Pago pendiente de verificar')+'</em></div><div class="chat-msg outbound">Estado registrado: <b>'+escape(stage)+'</b>.</div>':'<p class="empty">Sin conversaciones de ejemplo.</p>';
+ return '<section class="inbox-workspace"><aside class="inbox-list"><div class="inbox-panel-heading"><strong>Conversaciones</strong><span>'+state.orders.length+' activas</span></div><div class="inbox-search">⌕ Buscar por nombre o pedido</div>'+rows+'<div class="inbox-caption">Conversaciones reconstruidas para la demostración. No son mensajes de WhatsApp.</div></aside><div class="inbox-thread"><header><span class="inbox-initial large">'+escape((selected?.customer||'?').slice(0,1))+'</span><div><strong>'+escape(selected?.customer||'Cliente')+'</strong><small>Vista ilustrativa · Sin conexión a Meta</small></div><span class="inbox-thread-online">●</span></header><div class="inbox-messages"><span class="inbox-today">FLUJO COMERCIAL DEMO</span>'+chat+'</div><footer><span>No se envían mensajes reales</span><button class="btn primary tiny" data-view="orders">Abrir operación ↗</button></footer></div><aside class="inbox-context"><div class="context-label">CONTEXTO COMERCIAL</div><h3>Todo conectado.</h3><p>El mensaje es solo el principio. Cada operación conserva estado, importe y siguiente paso.</p><div class="context-slice"><span>CLIENTE</span><strong>'+escape(selected?.customer||'—')+'</strong></div><div class="context-slice"><span>OPERACIÓN</span><strong>'+escape(selected?.id||'—')+'</strong><small>'+escape(stage)+'</small></div><div class="context-slice"><span>IMPORTE</span><strong>'+moneyText+'</strong><small>'+(paid?'Pago ficticio confirmado':'No existe pago verificado')+'</small></div><div class="context-slice"><span>PRÓXIMA ACCIÓN</span><strong>'+(paid?'Gestionar preparación o despacho':'Revisar pago y confirmar')+'</strong></div><button class="btn primary" data-view="orders">Ver tablero de operaciones →</button></aside></section>';
+}
+
 function render(){
  const active=state.orders.filter(x=>!['completed','cancelled'].includes(x.status));
  const pending=state.orders.filter(x=>x.status==='awaiting_payment').length;
@@ -116,12 +128,13 @@ function render(){
    <nav aria-label="Navegación principal">
      <div class="subheading">ESPACIO DE TRABAJO</div>
      <button class="navbtn ${state.view==='overview'?'active':''}" data-view="overview"><span class="navicon">▦</span> Centro de mando</button>
+     <button class="navbtn ${state.view==='inbox'?'active':''}" data-view="inbox"><span class="navicon">◎</span> Conversaciones</button>
      <button class="navbtn ${state.view==='orders'?'active':''}" data-view="orders"><span class="navicon">▤</span> Operaciones</button>
      <button class="navbtn ${state.view==='connections'?'active':''}" data-view="connections"><span class="navicon">⬡</span> Integraciones</button>
      <div class="subheading">PLATAFORMA</div>
      <button class="navbtn ${state.view==='settings'?'active':''}" data-view="settings"><span class="navicon">⚙</span> Configuración</button>
    </nav>
-   <div class="spacer"></div>
+   <a class="sidebar-landing" href="./landing/">↗ &nbsp; Landing comercial</a><div class="spacer"></div>
    <div class="sidefoot"><span class="online"></span> Entorno de desarrollo<br>Sin conexión bancaria ni despacho real</div>
  </aside>
  <main class="main">
@@ -129,12 +142,12 @@ function render(){
    <div class="actions"><span class="badge orange">◉ DEMOSTRACIÓN</span><select class="select" id="tenant-select" aria-label="Empresa">${state.tenants.map(t=>`<option value="${escape(t.id)}" ${t.id===state.tenant?'selected':''}>${escape(t.name)}</option>`).join('')}</select></div>
   </header>
   <section class="hero"><div><div class="eyebrow">OPERACIONES · EN TIEMPO REAL</div>
-   <h1>${state.view==='orders'?'Gestión de operaciones':state.view==='connections'?'Integraciones y canales':state.view==='settings'?'Configuración del espacio':'Tu negocio, bajo control.'}</h1>
-   <p>${state.view==='connections'?'WhatsApp, pagos y rutas se habilitan después de validar credenciales.':state.view==='settings'?'Configuración independiente por empresa y catálogo.':'De cada conversación a una operación organizada, con trazabilidad y estados claros.'}</p>
+   <h1>${state.view==='inbox'?'Bandeja de conversaciones':state.view==='orders'?'Gestión de operaciones':state.view==='connections'?'Integraciones y canales':state.view==='settings'?'Configuración del espacio':'Convierte mensajes en operaciones.'}</h1>
+   <p>${state.view==='inbox'?'Conversaciones ilustrativas vinculadas al estado real de cada operación de prueba.':state.view==='connections'?'WhatsApp, pagos y rutas se habilitan después de validar credenciales.':state.view==='settings'?'Configuración independiente por empresa y catálogo.':'De cada conversación a una operación organizada, con trazabilidad y estados claros.'}</p>
    </div><button class="btn primary" id="add-order">＋ Nueva operación</button></section>
-  ${state.view==='connections'?`<div class="bottom"><div class="feature"><span class="ico">◉</span><div><b>WhatsApp Cloud API</b><small>Webhook firmado · conexión real pendiente</small></div></div><div class="feature"><span class="ico">▣</span><div><b>Pagos</b><small>Solo simulación · sin cargos</small></div></div><div class="feature"><span class="ico">⌖</span><div><b>Rutas</b><small>ETA real pendiente</small></div></div></div>`:
+  ${state.view==='inbox'?inboxDemo():state.view==='connections'?`<div class="bottom"><div class="feature"><span class="ico">◉</span><div><b>WhatsApp Cloud API</b><small>Webhook firmado · conexión real pendiente</small></div></div><div class="feature"><span class="ico">▣</span><div><b>Pagos</b><small>Solo simulación · sin cargos</small></div></div><div class="feature"><span class="ico">⌖</span><div><b>Rutas</b><small>ETA real pendiente</small></div></div></div>`:
    state.view==='settings'?`<section class="panel" style="padding:25px"><h2>${escape(current.name)}</h2><p style="color:var(--muted);font-size:13px">Segmento: ${escape(current.segment)} · ID: ${escape(current.id)}</p><p style="color:var(--muted);font-size:13px">Productos configurados: ${state.products.length}. La edición del catálogo y los permisos de producción están en la hoja de ruta.</p></section>`:
-  `<div class="stats">
+  `<div class="premium-hero"><div class="hero-left"><span class="hero-eyebrow">● WHATSAPP-FIRST OPERATIONS</span><h2>Una conversación.<br>Todo tu <em>negocio en movimiento.</em></h2><p>Consultas, pedidos, cobros y seguimiento. La información deja de vivir perdida entre chats y se convierte en un sistema operativo comercial.</p><div class="hero-buttons"><button class="btn primary" data-view="inbox">Explorar bandeja ↗</button><button class="btn ghost" data-view="orders">Ver flujo de pedidos →</button></div></div><div class="hero-right"><div class="hero-overline">OPERACIÓN COMERCIAL · DEMO</div><div class="hero-big">${pesos(sum)}</div><p>Cobros simulados registrados</p><div class="hero-divider"></div><div><span>Operaciones en seguimiento</span><b>${active.length}</b></div><div><span>Pendientes de cobro</span><b>${pending}</b></div><div><span>Empresa seleccionada</span><b>${escape(current.name)}</b></div><footer>CONVERSACIÓN → PEDIDO → PAGO → ENTREGA</footer></div></div><div class="stats">
    <div class="stat"><div class="k">OPERACIONES <span class="bubble">▤</span></div><div class="v">${state.orders.length}</div><div class="foot">Registradas en este espacio</div></div>
    <div class="stat"><div class="k">EN PROCESO <span class="bubble">⌛</span></div><div class="v">${active.length}</div><div class="foot">Requieren seguimiento</div></div>
    <div class="stat"><div class="k">PAGOS PENDIENTES <span class="bubble">◫</span></div><div class="v">${pending}</div><div class="foot">No confirmados por proveedor</div></div>
@@ -145,7 +158,7 @@ function render(){
    <div class="rows">${visible.length?visible.map(o=>`<div class="order"><div class="avatar">${escape(o.customer.slice(0,2).toUpperCase())}</div><div class="info"><div class="name">${escape(o.customer)}</div><div class="desc">#${escape(o.id.slice(0,13))} · ${time(o.created_at)} · ${o.items.length} línea(s)</div></div><div class="meta"><span class="money">${pesos(o.total_cents)}</span><span class="badge ${tone(o.status)}">${escape(labels[o.status]||o.status)}</span>${action(o)}</div></div>`).join(''):'<div class="empty">No hay operaciones en esta etapa.</div>'}</div>
   </section><section class="panel"><div class="panelhead"><div><strong>Actividad reciente</strong><br><span>Historial de eventos</span></div><span>Auditoría</span></div><div class="timeline">${state.events.length?state.events.slice(0,9).map(e=>`<div class="event"><div class="eventico">↗</div><div class="copy">${escape(e.description)}<time>${time(e.created_at)}</time></div></div>`).join(''):'<div class="empty">Los nuevos eventos aparecerán aquí.</div>'}</div></section></div>
   <div class="bottom"><div class="feature"><span class="ico">◎</span><div><b>Espacios independientes</b><small>Tres sectores en un mismo núcleo</small></div></div><div class="feature"><span class="ico">▣</span><div><b>Estados controlados</b><small>Sin pagos aprobados por la IA</small></div></div><div class="feature"><span class="ico">◇</span><div><b>Diseño modular</b><small>Preparado para ampliar funciones</small></div></div></div>`}
-  <div class="statusfoot"><span>* Todos los pagos mostrados son ficticios en esta demostración.</span><span>CONV-OS · MVP v0.2</span></div>
+  <div class="statusfoot"><span>* Todos los pagos mostrados son ficticios en esta demostración.</span><span>CONV-OS · PREMIUM PREVIEW v0.3</span></div>
  </main></div>${state.modal?modal():''}`;
  bind();
 }
@@ -156,6 +169,7 @@ function bind(){
  $('#new-order')?.addEventListener('submit',createOrder);
  document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{state.view=b.dataset.view;state.filter='all';render()}));
  document.querySelectorAll('[data-filter]').forEach(b=>b.addEventListener('click',()=>{state.filter=b.dataset.filter;render()}));
+ document.querySelectorAll('[data-chat-order]').forEach(b=>b.addEventListener('click',()=>{state.chatOrder=b.dataset.chatOrder;render()}));
  document.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('click',()=>mutate(b.dataset.action,b.dataset.id,b.dataset.next)));
 }
 refresh();
