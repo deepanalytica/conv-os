@@ -1,0 +1,37 @@
+name: Importar MVP y ejecutar pruebas
+on:
+  push:
+    branches: [main]
+    paths: ['bootstrap/part-05.txt']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  import-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Recuperar fuentes verificadas del paquete inicial
+        shell: bash
+        run: |
+          cat bootstrap/part-0*.txt | base64 --decode > /tmp/conv-os-runtime.tar.xz
+          sha256sum -c bootstrap/sha256.txt
+          tar -tJf /tmp/conv-os-runtime.tar.xz > /tmp/source-list.txt
+          if grep -Eq '(^/|(^|/)\.\./)' /tmp/source-list.txt; then echo 'Ruta insegura'; exit 1; fi
+          tar -xJf /tmp/conv-os-runtime.tar.xz
+      - name: Verificar sintaxis, dominio, API y aislamiento de datos
+        run: npm run check
+      - name: Crear commit reproducible de los fuentes
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git rm -r -f bootstrap || true
+          git diff --cached --quiet || git commit -m "feat: import Conversation Ops fullstack MVP and passing tests"
+          git push
