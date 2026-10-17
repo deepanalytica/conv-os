@@ -4,6 +4,16 @@
 
 > **Estado: MVP experimental v0.2. No utilizar con datos reales, pagos reales o clientes sin completar seguridad, autorización e integraciones.**
 
+## Versión premium · octubre 2026
+
+- **[Abrir UI premium](https://deepanalytica.github.io/conv-os/)** — panel operativo, inbox ilustrativo, gestión de pedidos y estados.
+- **[Ver landing](https://deepanalytica.github.io/conv-os/landing/)** — presentación comercial responsive y escenarios por industria.
+- **[GitHub Actions](https://github.com/deepanalytica/conv-os/actions)** — verificación del código y publicación automática.
+
+La bandeja muestra conversaciones **reconstruidas a partir de pedidos ficticios** para ilustrar la experiencia; no accede a mensajes reales.
+No se ha activado una conexión auténtica con WhatsApp Business, una pasarela bancaria ni una API de mapas.
+La landing es un diseño promocional, no una página que procese formularios de inscripción.
+
 ## Qué incluye
 - API Node.js 22.13 con SQLite nativo, aislamiento básico por empresa y datos ficticios.
 - Catálogo, creación de operaciones, cálculo de totales y máquina de estados.
