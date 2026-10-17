@@ -22,3 +22,12 @@ Foco visible, contraste, etiquetas de formulario, reducción de movimiento, mens
 
 ## Librerías
 React Bits y GSAP son candidatas para marketing o microinteracciones; no se incluyen como dependencia del MVP y nunca deben ralentizar cocina o reparto.
+
+
+## Dirección v0.3 · WhatsApp-first
+- **Contexto:** bandeja de conversaciones simuladas, chat y panel lateral de estados.
+- **Colores:** carbón y verde conversacional; no pretende ser una aplicación oficial de Meta.
+- **Tokens:** superficies oscuras, borde de bajo contraste, verde para acciones y estados positivos.
+- **Producto y marketing:** `public/premium.css` gobierna la demo y `public/landing/landing.css` la landing; se recomienda unificar los tokens en la próxima versión de React.
+- **Accesibilidad:** texto de estado, foco visible, layout móvil y respeto a preferencias de movimiento reducido.
+- **Advertencias operacionales:** no inferir pagos bancarios de mensajes o comprobantes; la demo nunca envía mensajes reales.
