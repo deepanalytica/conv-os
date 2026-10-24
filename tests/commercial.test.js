@@ -21,12 +21,14 @@ async function call(path,tenant='wal',body,method='GET'){
  let result;
  const json=(res,status,payload)=>{result={status,data:payload}};
  const req={method},res={};
- const processed=await handleCommercial({
-  db,req,res,path,tenant,json,
-  limited:async()=>Buffer.from(JSON.stringify(body??{})),
-  checkedJson:raw=>JSON.parse(raw.toString())
- });
- return {processed,...result};
+ try{
+  const processed=await handleCommercial({
+   db,req,res,path,tenant,json,
+   limited:async()=>Buffer.from(JSON.stringify(body??{})),
+   checkedJson:raw=>JSON.parse(raw.toString())
+  });
+  return {processed,...result};
+ }catch(error){return {processed:true,status:error.status||500,data:{error:error.message}}}
 }
 test('sin cotizaciones los márgenes y ventas comprobadas son NO_DATA',()=>{
  const result=commercialSummary(db,'wal');
