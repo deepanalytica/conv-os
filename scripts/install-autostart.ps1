@@ -14,4 +14,4 @@ $settings=New-ScheduledTaskSettingsSet -ExecutionTimeLimit (New-TimeSpan -Second
 $principal=New-ScheduledTaskPrincipal -UserId $user -LogonType Interactive -RunLevel Limited
 Register-ScheduledTask -TaskName $name -Action $action -Trigger $trigger -Settings $settings -Principal $principal -Force | Out-Null
 Write-Host "Tarea $name instalada para $user. No se ha abierto ningún puerto ni túnel." -ForegroundColor Green
-Write-Host "Para revertir: Unregister-ScheduledTask -TaskName '$name' -Confirm:\$false"
+Write-Host 'Para revertir: Unregister-ScheduledTask -TaskName "ConvOS Local" -Confirm:$false'
