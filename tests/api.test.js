@@ -1,8 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHmac} from 'node:crypto';
+import {request} from 'node:http';
+import {passwordHash} from '../src/security.js';
 process.env.DB_PATH=':memory:';
 process.env.DEMO_MODE='true';
+process.env.CONVOS_AUTH_HASH=passwordHash('unit test private owner password');
+process.env.ENABLE_META_WEBHOOKS='true';
 process.env.META_APP_SECRET='unit-test-meta-secret';
 process.env.META_TENANT_ID='demo-food';
 process.env.META_PHONE_NUMBER_ID='123';
@@ -11,15 +15,39 @@ const server=createServer();
 await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
 const url='http://127.0.0.1:'+server.address().port;
 test.after(()=>new Promise(resolve=>server.close(resolve)));
-async function call(path,{method='GET',tenant='demo-food',token='local-demo-token',body,headers={}}={}){
- const response=await fetch(url+path,{method,headers:{authorization:'Bearer '+token,'x-tenant-id':tenant,'content-type':'application/json',...headers},body:body?JSON.stringify(body):undefined});
+let cookie='',csrf='';
+async function call(path,{method='GET',tenant='demo-food',token='valid',body,headers={}}={}){
+ const response=await fetch(url+path,{method,headers:{cookie:token==='wrong'?'convos_local_session=invalid':cookie,'x-csrf-token':csrf,'x-tenant-id':tenant,'content-type':'application/json',...headers},body:body?JSON.stringify(body):undefined});
  return {status:response.status,data:await response.json()};
 }
+test('no hay acceso por token demo y existe login seguro',async()=>{
+ const unauth=await fetch(url+'/api/tenants',{headers:{authorization:'Bearer local-demo-token'}});
+ assert.equal(unauth.status,401);
+ const incorrect=await fetch(url+'/api/auth/login',{method:'POST',headers:{'content-type':'application/json','x-convos-login':'1'},body:JSON.stringify({password:'bad password'})});
+ assert.equal(incorrect.status,401);
+ const login=await fetch(url+'/api/auth/login',{method:'POST',headers:{'content-type':'application/json','x-convos-login':'1'},body:JSON.stringify({password:'unit test private owner password'})});
+ assert.equal(login.status,200);
+ cookie=login.headers.get('set-cookie').split(';')[0];
+ assert.match(login.headers.get('set-cookie'),/HttpOnly/);
+ assert.match(login.headers.get('set-cookie'),/SameSite=Strict/);
+ const session=await fetch(url+'/api/auth/session',{headers:{cookie}});
+ assert.equal(session.status,200);
+ csrf=(await session.json()).csrf;
+ const denied=await fetch(url+'/api/crm/contacts',{method:'POST',headers:{cookie,'x-tenant-id':'demo-wal','content-type':'application/json'},body:JSON.stringify({name:'Bad',channel:'manual'})});
+ assert.equal(denied.status,403);
+ const hostStatus=await new Promise((resolve,reject)=>{
+  const h=request(url+'/api/health',{headers:{Host:'evil.com'}},res=>{res.resume();res.on('end',()=>resolve(res.statusCode))});
+  h.on('error',reject);h.end();
+ });
+ assert.equal(hostStatus,403);
+ const foreignOrigin=await fetch(url+'/api/crm/contacts',{method:'POST',headers:{cookie,'x-tenant-id':'demo-wal','x-csrf-token':csrf,'content-type':'application/json',origin:'http://localhost:5555'},body:JSON.stringify({name:'No autorizado',channel:'manual'})});
+ assert.equal(foreignOrigin.status,403);
+});
 test('salud y acceso protegido',async()=>{
  assert.equal((await call('/api/health')).status,200);
  assert.equal((await call('/api/tenants',{token:'wrong'})).status,401);
  const tenants=await call('/api/tenants');
- assert.equal(tenants.data.tenants.length,3);
+ assert.equal(tenants.data.tenants.length,5);
 });
 test('pedido cotizado y aislado por empresa',async()=>{
  const created=await call('/api/orders',{method:'POST',body:{customer:'Cliente de prueba',items:[{productId:'p1',qty:2}]}});
@@ -53,4 +81,65 @@ test('Meta webhook invalida firmas incorrectas y evita mensajes duplicados',asyn
  }
  const list=await call('/api/messages');
  assert.equal(list.data.messages.length,1);
+});
+
+test('CRM: contactos y oportunidades están aislados por empresa',async()=>{
+ const contact=await call('/api/crm/contacts',{method:'POST',tenant:'demo-wal',body:{name:'Contacto de prueba',channel:'instagram'}});
+ assert.equal(contact.status,201);
+ assert.equal(contact.data.contact.consent_status,'unknown');
+ const contactId=contact.data.contact.id;
+ const wrongTenant=await call('/api/crm/opportunities',{method:'POST',tenant:'demo-vaa',body:{contact_id:contactId,title:'No permitido',amount_cents:1000}});
+ assert.equal(wrongTenant.status,404);
+ const created=await call('/api/crm/opportunities',{method:'POST',tenant:'demo-wal',body:{contact_id:contactId,title:'Tazón personalizado',amount_cents:1999000,source:'manual'}});
+ assert.equal(created.status,201);
+ assert.equal(created.data.opportunity.stage,'new');
+ const id=created.data.opportunity.id;
+ const crossList=await call('/api/crm/opportunities',{tenant:'demo-vaa'});
+ assert.ok(crossList.data.opportunities.every(x=>x.id!==id));
+ const crossUpdate=await call('/api/crm/opportunities/'+id+'/stage',{method:'POST',tenant:'demo-vaa',body:{stage:'qualified'}});
+ assert.equal(crossUpdate.status,404);
+ const leap=await call('/api/crm/opportunities/'+id+'/stage',{method:'POST',tenant:'demo-wal',body:{stage:'won'}});
+ assert.equal(leap.status,400);
+ for(const stage of ['qualified','proposal','won']){
+  const update=await call('/api/crm/opportunities/'+id+'/stage',{method:'POST',tenant:'demo-wal',body:{stage}});
+  assert.equal(update.status,200);
+  assert.equal(update.data.opportunity.stage,stage);
+ }
+ const repeat=await call('/api/crm/opportunities/'+id+'/stage',{method:'POST',tenant:'demo-wal',body:{stage:'won'}});
+ assert.equal(repeat.status,400);
+ const overview=await call('/api/crm/overview',{tenant:'demo-wal'});
+ assert.equal(overview.status,200);
+ assert.ok(overview.data.wonEstimatedCents>=1999000);
+});
+test('CRM: valida canales, importes y autenticación',async()=>{
+ const invalidChannel=await call('/api/crm/contacts',{method:'POST',tenant:'demo-wal',body:{name:'X',channel:'sms'}});
+ assert.equal(invalidChannel.status,400);
+ const c=await call('/api/crm/contacts',{tenant:'demo-wal'});
+ const valid=c.data.contacts[0];
+ const negative=await call('/api/crm/opportunities',{method:'POST',tenant:'demo-wal',body:{contact_id:valid.id,title:'Precio inválido',amount_cents:-10}});
+ assert.equal(negative.status,400);
+ const noToken=await call('/api/crm/contacts',{tenant:'demo-wal',token:'wrong'});
+ assert.equal(noToken.status,401);
+});
+
+test('seguimientos manuales conservan aislamiento y estado de cumplimiento',async()=>{
+ const c=await call('/api/crm/contacts',{method:'POST',tenant:'demo-wal',body:{name:'Cliente de seguimiento',channel:'manual'}});
+ assert.equal(c.status,201);
+ const o=await call('/api/crm/opportunities',{method:'POST',tenant:'demo-wal',body:{contact_id:c.data.contact.id,title:'Pedido personalizado',amount_cents:1000000}});
+ assert.equal(o.status,201);
+ const due_at='2026-12-01T12:00:00.000Z';
+ const other=await call('/api/crm/followups',{tenant:'demo-vaa',method:'POST',body:{opportunity_id:o.data.opportunity.id,title:'No permitido',due_at}});
+ assert.equal(other.status,404);
+ const f=await call('/api/crm/followups',{tenant:'demo-wal',method:'POST',body:{opportunity_id:o.data.opportunity.id,title:'Confirmar diseño del pedido',due_at}});
+ assert.equal(f.status,201);
+ assert.equal(f.data.followup.status,'open');
+ const incorrectDate=await call('/api/crm/followups',{tenant:'demo-wal',method:'POST',body:{opportunity_id:o.data.opportunity.id,title:'Fecha incorrecta',due_at:'mañana'}});
+ assert.equal(incorrectDate.status,400);
+ const cross=await call('/api/crm/followups/'+f.data.followup.id+'/complete',{tenant:'demo-vaa',method:'POST',body:{}});
+ assert.equal(cross.status,404);
+ const done=await call('/api/crm/followups/'+f.data.followup.id+'/complete',{tenant:'demo-wal',method:'POST',body:{}});
+ assert.equal(done.status,200);
+ assert.equal(done.data.followup.status,'completed');
+ const duplicate=await call('/api/crm/followups/'+f.data.followup.id+'/complete',{tenant:'demo-wal',method:'POST',body:{}});
+ assert.equal(duplicate.status,409);
 });

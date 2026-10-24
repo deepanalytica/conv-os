@@ -24,6 +24,17 @@ jobs:
         run: |
           test -f public/index.html
           test -f public/app.js
+          test -f public/crm-ui.js
+          test -f public/crm-ui.css
+          test -f public/login.html
+          test -f public/login.css
+          test -f public/login.js
+          test -f src/security.js
+          test -f src/followups.js
+          test -f scripts/backup-local.mjs
+          test -f scripts/restore-local.mjs
+          test -f scripts/secret-input.mjs
+          test -f scripts/setup-local.mjs
           test -f public/styles.css
           test -f public/premium.css
           test -f public/landing/index.html

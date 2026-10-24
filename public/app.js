@@ -1,17 +1,22 @@
+import {activateCrm} from './crm-ui.js';
 const $=s=>document.querySelector(s);
 const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const staticDemo=location.hostname.endsWith('.github.io')||location.protocol==='file:';
 const demoTenants=[
  {id:'demo-food',name:'Negocio gastronómico',segment:'food'},
  {id:'demo-service',name:'Servicios técnicos',segment:'service'},
- {id:'demo-distribution',name:'Distribuidora',segment:'distribution'}
+ {id:'demo-distribution',name:'Distribuidora',segment:'distribution'},
+ {id:'demo-wal',name:'WAL · Regalos personalizados',segment:'retail'},
+ {id:'demo-vaa',name:'Visual Art AI',segment:'services'}
 ];
 const demoCatalog={
  'demo-food':[{id:'p1',name:'Producto clásico',price_cents:299000},{id:'p2',name:'Promoción familiar',price_cents:1099000}],
  'demo-service':[{id:'p1',name:'Visita técnica',price_cents:1500000},{id:'p2',name:'Mantención',price_cents:3990000}],
- 'demo-distribution':[{id:'p1',name:'Caja de insumos',price_cents:1299000},{id:'p2',name:'Paquete mayorista',price_cents:4999000}]
+ 'demo-distribution':[{id:'p1',name:'Caja de insumos',price_cents:1299000},{id:'p2',name:'Paquete mayorista',price_cents:4999000}],
+ 'demo-wal':[{id:'mug',name:'Tazón personalizado',price_cents:1999000},{id:'gift-pack',name:'Pack de regalo',price_cents:6999000}],
+ 'demo-vaa':[{id:'audit',name:'Diagnóstico de presencia digital',price_cents:15000000},{id:'automation',name:'Automatización comercial',price_cents:35000000}]
 };
-let state={tenant:'demo-food',tenants:demoTenants,orders:[],products:[],events:[],view:'overview',filter:'all',modal:false,loading:true};
+let state={tenant:'demo-wal',tenants:demoTenants,orders:[],products:[],events:[],view:'crm',filter:'all',modal:false,loading:true};
 const labels={draft:'Borrador',awaiting_payment:'Pago pendiente',paid:'Pago simulado',in_progress:'En proceso',ready:'Listo',out_for_delivery:'En despacho',completed:'Finalizado',cancelled:'Cancelado'};
 const next={draft:'awaiting_payment',awaiting_payment:'paid',paid:'in_progress',in_progress:'ready',ready:'out_for_delivery',out_for_delivery:'completed'};
 const tone=s=>s==='completed'?'green':s==='awaiting_payment'?'orange':s==='paid'?'purple':s==='cancelled'?'red':'';
@@ -35,7 +40,12 @@ function seed(){
  demoWrite(data);return data;
 }
 async function api(path,method='GET',body=null){
- const res=await fetch('./api'+path,{method,headers:{'content-type':'application/json','authorization':'Bearer local-demo-token','x-tenant-id':state.tenant},body:body?JSON.stringify(body):undefined});
+ const sessionResponse=await fetch('./api/auth/session',{credentials:'same-origin',cache:'no-store'});
+ if(!sessionResponse.ok)throw Error('Sesión local caducada. Vuelve a iniciar sesión.');
+ const session=await sessionResponse.json();
+ const res=await fetch('./api'+path,{method,credentials:'same-origin',
+  headers:{'content-type':'application/json','x-tenant-id':state.tenant,...(method==='GET'?{}:{'x-csrf-token':session.csrf})},
+  body:body?JSON.stringify(body):undefined});
  const data=await res.json();
  if(!res.ok)throw Error(data.error||'Error en la solicitud');
  return data;
@@ -129,12 +139,13 @@ function render(){
      <div class="subheading">ESPACIO DE TRABAJO</div>
      <button class="navbtn ${state.view==='overview'?'active':''}" data-view="overview"><span class="navicon">▦</span> Centro de mando</button>
      <button class="navbtn ${state.view==='inbox'?'active':''}" data-view="inbox"><span class="navicon">◎</span> Conversaciones</button>
+     <button class="navbtn ${state.view==='crm'?'active':''}" data-view="crm"><span class="navicon">◇</span> Adquisición CRM</button>
      <button class="navbtn ${state.view==='orders'?'active':''}" data-view="orders"><span class="navicon">▤</span> Operaciones</button>
      <button class="navbtn ${state.view==='connections'?'active':''}" data-view="connections"><span class="navicon">⬡</span> Integraciones</button>
      <div class="subheading">PLATAFORMA</div>
      <button class="navbtn ${state.view==='settings'?'active':''}" data-view="settings"><span class="navicon">⚙</span> Configuración</button>
    </nav>
-   <a class="sidebar-landing" href="./landing/">↗ &nbsp; Landing comercial</a><div class="spacer"></div>
+   <a class="sidebar-landing" href="./landing/">↗ &nbsp; Landing comercial</a>${staticDemo?'':'<button type="button" class="navbtn" id="logout-local">Cerrar sesión segura ↗</button>'}<div class="spacer"></div>
    <div class="sidefoot"><span class="online"></span> Entorno de desarrollo<br>Sin conexión bancaria ni despacho real</div>
  </aside>
  <main class="main">
@@ -142,10 +153,10 @@ function render(){
    <div class="actions"><button class="theme-toggle" data-theme-toggle type="button" aria-label="Cambiar tema" aria-pressed="false">☼ <span>Modo claro</span></button><span class="badge orange">◉ DEMOSTRACIÓN</span><select class="select" id="tenant-select" aria-label="Empresa">${state.tenants.map(t=>`<option value="${escape(t.id)}" ${t.id===state.tenant?'selected':''}>${escape(t.name)}</option>`).join('')}</select></div>
   </header>
   <section class="hero"><div><div class="eyebrow">OPERACIONES · EN TIEMPO REAL</div>
-   <h1>${state.view==='inbox'?'Bandeja de conversaciones':state.view==='orders'?'Gestión de operaciones':state.view==='connections'?'Integraciones y canales':state.view==='settings'?'Configuración del espacio':'Convierte mensajes en operaciones.'}</h1>
-   <p>${state.view==='inbox'?'Conversaciones ilustrativas vinculadas al estado real de cada operación de prueba.':state.view==='connections'?'WhatsApp, pagos y rutas se habilitan después de validar credenciales.':state.view==='settings'?'Configuración independiente por empresa y catálogo.':'De cada conversación a una operación organizada, con trazabilidad y estados claros.'}</p>
+   <h1>${state.view==='inbox'?'Bandeja de conversaciones':state.view==='orders'?'Gestión de operaciones':state.view==='crm'?'Adquisición y oportunidades':state.view==='connections'?'Integraciones y canales':state.view==='settings'?'Configuración del espacio':'Convierte mensajes en operaciones.'}</h1>
+   <p>${state.view==='inbox'?'Conversaciones ilustrativas vinculadas al estado real de cada operación de prueba.':state.view==='crm'?'Gestiona contactos, califica oportunidades y mide resultados comerciales por empresa.':state.view==='connections'?'WhatsApp, pagos y rutas se habilitan después de validar credenciales.':state.view==='settings'?'Configuración independiente por empresa y catálogo.':'De cada conversación a una operación organizada, con trazabilidad y estados claros.'}</p>
    </div><button class="btn primary" id="add-order">＋ Nueva operación</button></section>
-  ${state.view==='inbox'?inboxDemo():state.view==='connections'?`<div class="bottom"><div class="feature"><span class="ico">◉</span><div><b>WhatsApp Cloud API</b><small>Webhook firmado · conexión real pendiente</small></div></div><div class="feature"><span class="ico">▣</span><div><b>Pagos</b><small>Solo simulación · sin cargos</small></div></div><div class="feature"><span class="ico">⌖</span><div><b>Rutas</b><small>ETA real pendiente</small></div></div></div>`:
+  ${state.view==='crm'?'<section id="crm-workspace" class="crm-workspace" aria-label="CRM de demostración"></section>':state.view==='inbox'?inboxDemo():state.view==='connections'?`<div class="bottom"><div class="feature"><span class="ico">◎</span><div><b>Instagram Direct</b><small>OAuth y webhooks pendientes</small></div></div><div class="feature"><span class="ico">◈</span><div><b>Facebook Messenger</b><small>Permisos de página pendientes</small></div></div><div class="feature"><span class="ico">◉</span><div><b>WhatsApp Business</b><small>Cloud API · evaluar coexistencia del número actual</small></div></div></div><div class="bottom"><div class="feature"><span class="ico">▣</span><div><b>Pagos</b><small>Solo simulación · sin cargos</small></div></div><div class="feature"><span class="ico">⌖</span><div><b>Rutas</b><small>ETA real pendiente</small></div></div><div class="feature"><span class="ico">◇</span><div><b>Integraciones oficiales</b><small>No se han vinculado cuentas reales</small></div></div></div>`:
    state.view==='settings'?`<section class="panel" style="padding:25px"><h2>${escape(current.name)}</h2><p style="color:var(--muted);font-size:13px">Segmento: ${escape(current.segment)} · ID: ${escape(current.id)}</p><p style="color:var(--muted);font-size:13px">Productos configurados: ${state.products.length}. La edición del catálogo y los permisos de producción están en la hoja de ruta.</p></section>`:
   `<div class="premium-hero"><div class="hero-left"><span class="hero-eyebrow">● WHATSAPP-FIRST OPERATIONS</span><h2>Una conversación.<br>Todo tu <em>negocio en movimiento.</em></h2><p>Consultas, pedidos, cobros y seguimiento. La información deja de vivir perdida entre chats y se convierte en un sistema operativo comercial.</p><div class="hero-buttons"><button class="btn primary" data-view="inbox">Explorar bandeja ↗</button><button class="btn ghost" data-view="orders">Ver flujo de pedidos →</button></div></div><div class="hero-right"><div class="hero-overline">OPERACIÓN COMERCIAL · DEMO</div><div class="hero-big">${pesos(sum)}</div><p>Cobros simulados registrados</p><div class="hero-divider"></div><div><span>Operaciones en seguimiento</span><b>${active.length}</b></div><div><span>Pendientes de cobro</span><b>${pending}</b></div><div><span>Empresa seleccionada</span><b>${escape(current.name)}</b></div><footer>CONVERSACIÓN → PEDIDO → PAGO → ENTREGA</footer></div></div><div class="stats">
    <div class="stat"><div class="k">OPERACIONES <span class="bubble">▤</span></div><div class="v">${state.orders.length}</div><div class="foot">Registradas en este espacio</div></div>
@@ -164,6 +175,15 @@ function render(){
  bind();
 }
 function bind(){
+ $('#logout-local')?.addEventListener('click',async()=>{
+  try{
+   const response=await fetch('/api/auth/session',{credentials:'same-origin',cache:'no-store'});
+   if(response.ok){
+    const session=await response.json();
+    await fetch('/api/auth/logout',{method:'POST',credentials:'same-origin',headers:{'x-csrf-token':session.csrf}});
+   }
+  }finally{location.replace('/')}
+ });
  $('#tenant-select')?.addEventListener('change',async e=>{state.tenant=e.target.value;state.filter='all';await refresh()});
  $('#add-order')?.addEventListener('click',()=>{state.modal=true;render()});
  $('#close-modal')?.addEventListener('click',()=>{state.modal=false;render()});
@@ -172,5 +192,6 @@ function bind(){
  document.querySelectorAll('[data-filter]').forEach(b=>b.addEventListener('click',()=>{state.filter=b.dataset.filter;render()}));
  document.querySelectorAll('[data-chat-order]').forEach(b=>b.addEventListener('click',()=>{state.chatOrder=b.dataset.chatOrder;render()}));
  document.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('click',()=>mutate(b.dataset.action,b.dataset.id,b.dataset.next)));
+ if(state.view==='crm')activateCrm({tenant:state.tenant,staticDemo,api,notify,escape,pesos});
 }
 refresh();
