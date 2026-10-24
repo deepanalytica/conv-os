@@ -13,7 +13,7 @@ const proposal=(overrides={})=>({
  mission_id:'96b1988f-1271-4b73-9efc-a2ec3f9a0f32',
  step_id:'5869494c-a7a3-4983-ae26-273ea2cb7008',
  idempotency_key:'d6702df6-5dde-4680-bb47-90defb4b95cb',
- revision:1,requirement_ids:['NFR-02'],dependencies:[],
+ revision:1,requirement_ids:['NFR-02'],dependencies:[],deadline:null,
  capability:'local.check',risk:'low',human_approval_required:false,
  budget:{calls:2,cost_usd_max:null},policy_digest:POLICY_DIGEST,...overrides
 });
@@ -52,6 +52,7 @@ test('denegación estricta ante digest, requisitos, presupuesto o identidad corr
   {policy_digest:'0'.repeat(64)},{requirement_ids:['FR-99']},
   {requirement_ids:['FR-01','FR-01']},{revision:0},{budget:{calls:100000,cost_usd_max:null}},
   {step_id:'arbitrary'},{dependencies:['arbitrary']},{risk:'urgent'},
+  {deadline:'ayer'}, {fake_approval:true},
   {capability:'exec.shell'}, {human_approval_required:'yes'}
  ];
  for(const override of invalid){
@@ -59,6 +60,11 @@ test('denegación estricta ante digest, requisitos, presupuesto o identidad corr
   assert.equal(result.decision,'DENY',JSON.stringify(override));
   assert.equal(result.may_execute,false);
  }
+});
+test('no basta una propuesta sin inventario de requisitos validado',()=>{
+ const d=assessStep(proposal());
+ assert.equal(d.decision,'DENY');
+ assert.equal(d.may_execute,false);
 });
 test('evidencia propia del agente no habilita producción',()=>{
  const forged=proposal({capability:'production.deploy',human_approval_required:true,
