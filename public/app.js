@@ -1,4 +1,5 @@
 import {activateCrm} from './crm-ui.js';
+import {activateIntegrations} from './integrations-ui.js';
 const $=s=>document.querySelector(s);
 const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const staticDemo=location.hostname.endsWith('.github.io')||location.protocol==='file:';
@@ -132,7 +133,7 @@ function render(){
  const sum=state.orders.filter(x=>x.verified_at).reduce((a,b)=>a+b.total_cents,0);
  const current=state.tenants.find(x=>x.id===state.tenant)||demoTenants[0];
  const visible=state.orders.filter(o=>state.filter==='all'||o.status===state.filter);
- $('#app').innerHTML=`<div class="layout">
+ $('#app').innerHTML=`<div class="layout" data-brand="${escape(state.tenant)}">
  <aside class="side">
    <div class="brand"><span class="symbol">◈</span><span>CONVERSATION <b>OPS</b><small>BUSINESS OPERATING SYSTEM</small></span></div>
    <nav aria-label="Navegación principal">
@@ -150,15 +151,16 @@ function render(){
  </aside>
  <main class="main">
   <header class="topbar"><div class="crumb">Workspace &nbsp;/&nbsp; <strong>${escape(current.name)}</strong></div>
-   <div class="actions"><button class="theme-toggle" data-theme-toggle type="button" aria-label="Cambiar tema" aria-pressed="false">☼ <span>Modo claro</span></button><span class="badge orange">◉ DEMOSTRACIÓN</span><select class="select" id="tenant-select" aria-label="Empresa">${state.tenants.map(t=>`<option value="${escape(t.id)}" ${t.id===state.tenant?'selected':''}>${escape(t.name)}</option>`).join('')}</select></div>
+   <div class="actions"><button class="theme-toggle" data-theme-toggle type="button" aria-label="Cambiar tema" aria-pressed="false">☼ <span>Modo claro</span></button><span class="badge orange">◉ SIN CANALES REALES</span><select class="select" id="tenant-select" aria-label="Empresa">${state.tenants.map(t=>`<option value="${escape(t.id)}" ${t.id===state.tenant?'selected':''}>${escape(t.name)}</option>`).join('')}</select></div>
   </header>
-  <section class="hero"><div><div class="eyebrow">OPERACIONES · EN TIEMPO REAL</div>
+  <div class="brand-context"><span class="brand-dot" aria-hidden="true"></span><span>Empresa: <strong>${escape(current.name)}</strong> · datos separados · ${staticDemo?'demostración pública':'sesión privada local'}</span></div>
+  <section class="hero"><div><div class="eyebrow">CONTROL DE ADQUISICIÓN · LABORATORIO</div>
    <h1>${state.view==='inbox'?'Bandeja de conversaciones':state.view==='orders'?'Gestión de operaciones':state.view==='crm'?'Adquisición y oportunidades':state.view==='connections'?'Integraciones y canales':state.view==='settings'?'Configuración del espacio':'Convierte mensajes en operaciones.'}</h1>
-   <p>${state.view==='inbox'?'Conversaciones ilustrativas vinculadas al estado real de cada operación de prueba.':state.view==='crm'?'Gestiona contactos, califica oportunidades y mide resultados comerciales por empresa.':state.view==='connections'?'WhatsApp, pagos y rutas se habilitan después de validar credenciales.':state.view==='settings'?'Configuración independiente por empresa y catálogo.':'De cada conversación a una operación organizada, con trazabilidad y estados claros.'}</p>
-   </div><button class="btn primary" id="add-order">＋ Nueva operación</button></section>
-  ${state.view==='crm'?'<section id="crm-workspace" class="crm-workspace" aria-label="CRM de demostración"></section>':state.view==='inbox'?inboxDemo():state.view==='connections'?`<div class="bottom"><div class="feature"><span class="ico">◎</span><div><b>Instagram Direct</b><small>OAuth y webhooks pendientes</small></div></div><div class="feature"><span class="ico">◈</span><div><b>Facebook Messenger</b><small>Permisos de página pendientes</small></div></div><div class="feature"><span class="ico">◉</span><div><b>WhatsApp Business</b><small>Cloud API · evaluar coexistencia del número actual</small></div></div></div><div class="bottom"><div class="feature"><span class="ico">▣</span><div><b>Pagos</b><small>Solo simulación · sin cargos</small></div></div><div class="feature"><span class="ico">⌖</span><div><b>Rutas</b><small>ETA real pendiente</small></div></div><div class="feature"><span class="ico">◇</span><div><b>Integraciones oficiales</b><small>No se han vinculado cuentas reales</small></div></div></div>`:
+   <p>${state.view==='inbox'?'Conversaciones ilustrativas vinculadas al estado real de cada operación de prueba.':state.view==='crm'?'Gestiona contactos, califica oportunidades y mide resultados comerciales por empresa.':state.view==='connections'?'Permisos, cuentas y webhooks por marca. Ninguna integración aparece conectada sin evidencia oficial.':state.view==='settings'?'Configuración independiente por empresa y catálogo.':'De cada conversación a una operación organizada, con trazabilidad y estados claros.'}</p>
+   </div>${['overview','orders'].includes(state.view)?'<button class="btn primary" id="add-order">＋ Nueva operación</button>':''}</section>
+  ${state.view==='crm'?'<section id="crm-workspace" class="crm-workspace" aria-label="CRM de demostración"></section>':state.view==='inbox'?inboxDemo():state.view==='connections'?'<section id="integration-workspace" aria-label="Conexiones Meta"></section>':
    state.view==='settings'?`<section class="panel" style="padding:25px"><h2>${escape(current.name)}</h2><p style="color:var(--muted);font-size:13px">Segmento: ${escape(current.segment)} · ID: ${escape(current.id)}</p><p style="color:var(--muted);font-size:13px">Productos configurados: ${state.products.length}. La edición del catálogo y los permisos de producción están en la hoja de ruta.</p></section>`:
-  `<div class="premium-hero"><div class="hero-left"><span class="hero-eyebrow">● WHATSAPP-FIRST OPERATIONS</span><h2>Una conversación.<br>Todo tu <em>negocio en movimiento.</em></h2><p>Consultas, pedidos, cobros y seguimiento. La información deja de vivir perdida entre chats y se convierte en un sistema operativo comercial.</p><div class="hero-buttons"><button class="btn primary" data-view="inbox">Explorar bandeja ↗</button><button class="btn ghost" data-view="orders">Ver flujo de pedidos →</button></div></div><div class="hero-right"><div class="hero-overline">OPERACIÓN COMERCIAL · DEMO</div><div class="hero-big">${pesos(sum)}</div><p>Cobros simulados registrados</p><div class="hero-divider"></div><div><span>Operaciones en seguimiento</span><b>${active.length}</b></div><div><span>Pendientes de cobro</span><b>${pending}</b></div><div><span>Empresa seleccionada</span><b>${escape(current.name)}</b></div><footer>CONVERSACIÓN → PEDIDO → PAGO → ENTREGA</footer></div></div><div class="stats">
+  `<div class="premium-hero"><div class="hero-left"><span class="hero-eyebrow">● ACQUISITION / OPERATIONS</span><h2>Cada oportunidad.<br>Una <em>decisión mejor.</em></h2><p>Contactos, seguimientos, presupuestos y operaciones en un mismo centro de mando. Resultados basados en evidencia, no en métricas inventadas.</p><div class="hero-buttons"><button class="btn primary" data-view="inbox">Explorar bandeja ↗</button><button class="btn ghost" data-view="orders">Ver flujo de pedidos →</button></div></div><div class="hero-right"><div class="hero-overline">OPERACIÓN COMERCIAL · DEMO</div><div class="hero-big">${pesos(sum)}</div><p>Cobros simulados registrados</p><div class="hero-divider"></div><div><span>Operaciones en seguimiento</span><b>${active.length}</b></div><div><span>Pendientes de cobro</span><b>${pending}</b></div><div><span>Empresa seleccionada</span><b>${escape(current.name)}</b></div><footer>CONVERSACIÓN → PEDIDO → PAGO → ENTREGA</footer></div></div><div class="stats">
    <div class="stat"><div class="k">OPERACIONES <span class="bubble">▤</span></div><div class="v">${state.orders.length}</div><div class="foot">Registradas en este espacio</div></div>
    <div class="stat"><div class="k">EN PROCESO <span class="bubble">⌛</span></div><div class="v">${active.length}</div><div class="foot">Requieren seguimiento</div></div>
    <div class="stat"><div class="k">PAGOS PENDIENTES <span class="bubble">◫</span></div><div class="v">${pending}</div><div class="foot">No confirmados por proveedor</div></div>
@@ -170,7 +172,7 @@ function render(){
    <div class="rows">${visible.length?visible.map(o=>`<div class="order"><div class="avatar">${escape(o.customer.slice(0,2).toUpperCase())}</div><div class="info"><div class="name">${escape(o.customer)}</div><div class="desc">#${escape(o.id.slice(0,13))} · ${time(o.created_at)} · ${o.items.length} línea(s)</div></div><div class="meta"><span class="money">${pesos(o.total_cents)}</span><span class="badge ${tone(o.status)}">${escape(labels[o.status]||o.status)}</span>${action(o)}</div></div>`).join(''):'<div class="empty">No hay operaciones en esta etapa.</div>'}</div>
   </section><section class="panel"><div class="panelhead"><div><strong>Actividad reciente</strong><br><span>Historial de eventos</span></div><span>Auditoría</span></div><div class="timeline">${state.events.length?state.events.slice(0,9).map(e=>`<div class="event"><div class="eventico">↗</div><div class="copy">${escape(e.description)}<time>${time(e.created_at)}</time></div></div>`).join(''):'<div class="empty">Los nuevos eventos aparecerán aquí.</div>'}</div></section></div>
   <div class="bottom"><div class="feature"><span class="ico">◎</span><div><b>Espacios independientes</b><small>Tres sectores en un mismo núcleo</small></div></div><div class="feature"><span class="ico">▣</span><div><b>Estados controlados</b><small>Sin pagos aprobados por la IA</small></div></div><div class="feature"><span class="ico">◇</span><div><b>Diseño modular</b><small>Preparado para ampliar funciones</small></div></div></div>`}
-  <div class="statusfoot"><span>* Todos los pagos mostrados son ficticios en esta demostración.</span><span>CONV-OS · PREMIUM PREVIEW v0.3</span></div>
+  <div class="statusfoot"><span>* Todos los pagos mostrados son ficticios en esta demostración.</span><span>ACQUISITION OS · PRIVATE WORKSPACE v0.5</span></div>
  </main></div>${state.modal?modal():''}`;
  bind();
 }
@@ -193,5 +195,6 @@ function bind(){
  document.querySelectorAll('[data-chat-order]').forEach(b=>b.addEventListener('click',()=>{state.chatOrder=b.dataset.chatOrder;render()}));
  document.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('click',()=>mutate(b.dataset.action,b.dataset.id,b.dataset.next)));
  if(state.view==='crm')activateCrm({tenant:state.tenant,staticDemo,api,notify,escape,pesos});
+ if(state.view==='connections')activateIntegrations({api,staticDemo,notify,escape,tenantName:state.tenants.find(t=>t.id===state.tenant)?.name||state.tenant});
 }
 refresh();
