@@ -1,8 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHmac} from 'node:crypto';
+import {passwordHash} from '../src/security.js';
 process.env.DB_PATH=':memory:';
 process.env.DEMO_MODE='true';
+process.env.CONVOS_AUTH_HASH=passwordHash('unit test private owner password');
+process.env.ENABLE_META_WEBHOOKS='true';
 process.env.META_APP_SECRET='unit-test-meta-secret';
 process.env.META_TENANT_ID='demo-food';
 process.env.META_PHONE_NUMBER_ID='123';
@@ -11,10 +14,29 @@ const server=createServer();
 await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
 const url='http://127.0.0.1:'+server.address().port;
 test.after(()=>new Promise(resolve=>server.close(resolve)));
-async function call(path,{method='GET',tenant='demo-food',token='local-demo-token',body,headers={}}={}){
- const response=await fetch(url+path,{method,headers:{authorization:'Bearer '+token,'x-tenant-id':tenant,'content-type':'application/json',...headers},body:body?JSON.stringify(body):undefined});
+let cookie='',csrf='';
+async function call(path,{method='GET',tenant='demo-food',token='valid',body,headers={}}={}){
+ const response=await fetch(url+path,{method,headers:{cookie:token==='wrong'?'convos_local_session=invalid':cookie,'x-csrf-token':csrf,'x-tenant-id':tenant,'content-type':'application/json',...headers},body:body?JSON.stringify(body):undefined});
  return {status:response.status,data:await response.json()};
 }
+test('no hay acceso por token demo y existe login seguro',async()=>{
+ const unauth=await fetch(url+'/api/tenants',{headers:{authorization:'Bearer local-demo-token'}});
+ assert.equal(unauth.status,401);
+ const incorrect=await fetch(url+'/api/auth/login',{method:'POST',headers:{'content-type':'application/json','x-convos-login':'1'},body:JSON.stringify({password:'bad password'})});
+ assert.equal(incorrect.status,401);
+ const login=await fetch(url+'/api/auth/login',{method:'POST',headers:{'content-type':'application/json','x-convos-login':'1'},body:JSON.stringify({password:'unit test private owner password'})});
+ assert.equal(login.status,200);
+ cookie=login.headers.get('set-cookie').split(';')[0];
+ assert.match(login.headers.get('set-cookie'),/HttpOnly/);
+ assert.match(login.headers.get('set-cookie'),/SameSite=Strict/);
+ const session=await fetch(url+'/api/auth/session',{headers:{cookie}});
+ assert.equal(session.status,200);
+ csrf=(await session.json()).csrf;
+ const denied=await fetch(url+'/api/crm/contacts',{method:'POST',headers:{cookie,'x-tenant-id':'demo-wal','content-type':'application/json'},body:JSON.stringify({name:'Bad',channel:'manual'})});
+ assert.equal(denied.status,403);
+ const host=await fetch(url+'/api/health',{headers:{host:'evil.com'}});
+ assert.equal(host.status,403);
+});
 test('salud y acceso protegido',async()=>{
  assert.equal((await call('/api/health')).status,200);
  assert.equal((await call('/api/tenants',{token:'wrong'})).status,401);
