@@ -40,7 +40,12 @@ function seed(){
  demoWrite(data);return data;
 }
 async function api(path,method='GET',body=null){
- const res=await fetch('./api'+path,{method,headers:{'content-type':'application/json','authorization':'Bearer local-demo-token','x-tenant-id':state.tenant},body:body?JSON.stringify(body):undefined});
+ const sessionResponse=await fetch('./api/auth/session',{credentials:'same-origin',cache:'no-store'});
+ if(!sessionResponse.ok)throw Error('Sesión local caducada. Vuelve a iniciar sesión.');
+ const session=await sessionResponse.json();
+ const res=await fetch('./api'+path,{method,credentials:'same-origin',
+  headers:{'content-type':'application/json','x-tenant-id':state.tenant,...(method==='GET'?{}:{'x-csrf-token':session.csrf})},
+  body:body?JSON.stringify(body):undefined});
  const data=await res.json();
  if(!res.ok)throw Error(data.error||'Error en la solicitud');
  return data;
@@ -140,7 +145,7 @@ function render(){
      <div class="subheading">PLATAFORMA</div>
      <button class="navbtn ${state.view==='settings'?'active':''}" data-view="settings"><span class="navicon">⚙</span> Configuración</button>
    </nav>
-   <a class="sidebar-landing" href="./landing/">↗ &nbsp; Landing comercial</a><div class="spacer"></div>
+   <a class="sidebar-landing" href="./landing/">↗ &nbsp; Landing comercial</a>${staticDemo?'':'<button type="button" class="navbtn" id="logout-local">Cerrar sesión segura ↗</button>'}<div class="spacer"></div>
    <div class="sidefoot"><span class="online"></span> Entorno de desarrollo<br>Sin conexión bancaria ni despacho real</div>
  </aside>
  <main class="main">
@@ -170,6 +175,15 @@ function render(){
  bind();
 }
 function bind(){
+ $('#logout-local')?.addEventListener('click',async()=>{
+  try{
+   const response=await fetch('/api/auth/session',{credentials:'same-origin',cache:'no-store'});
+   if(response.ok){
+    const session=await response.json();
+    await fetch('/api/auth/logout',{method:'POST',credentials:'same-origin',headers:{'x-csrf-token':session.csrf}});
+   }
+  }finally{location.replace('/')}
+ });
  $('#tenant-select')?.addEventListener('change',async e=>{state.tenant=e.target.value;state.filter='all';await refresh()});
  $('#add-order')?.addEventListener('click',()=>{state.modal=true;render()});
  $('#close-modal')?.addEventListener('click',()=>{state.modal=false;render()});
