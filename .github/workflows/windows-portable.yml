@@ -1,0 +1,59 @@
+name: Windows portable package
+on:
+  push:
+    branches: [feat/windows-distribution-acquisition]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  package-windows:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.13.0'
+      - name: Verify source and security contracts on Windows
+        shell: pwsh
+        run: |
+          npm run check
+          if ($LASTEXITCODE -ne 0) { throw "Tests failed" }
+      - name: Assemble portable Windows application
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $target=Join-Path (Get-Location) 'dist/ConvOS-Windows'
+          New-Item -ItemType Directory -Force -Path $target | Out-Null
+          foreach($folder in @('src','public','scripts','docs','tests')) {
+            Copy-Item -Recurse -Force -Path $folder -Destination $target
+          }
+          foreach($file in @('package.json','AGENTS.md','README.md','ARCHITECTURE.md','DESIGN_SYSTEM.md','.env.example')) {
+            Copy-Item -Force -Path $file -Destination $target
+          }
+          Get-ChildItem -Path packaging -Filter '*.cmd' | ForEach-Object {
+            Copy-Item -Force -Path $_.FullName -Destination $target
+          }
+          Copy-Item -Force -Path 'packaging/LEEME-PRIMERO.txt' -Destination $target
+          $node=(Get-Command node).Source
+          Copy-Item -Force -Path $node -Destination (Join-Path $target 'node.exe')
+          if ((Test-Path (Join-Path $target '.local')) -or (Test-Path (Join-Path $target 'data'))) {
+            throw 'Unexpected private data folder in package'
+          }
+          & (Join-Path $target 'node.exe') --check (Join-Path $target 'src/server.js')
+          if ($LASTEXITCODE -ne 0) { throw 'Bundled runtime verification failed' }
+          $targetNode=Join-Path $target 'node.exe'
+          & $targetNode --experimental-sqlite --test (Join-Path $target 'tests/security.test.js')
+          if ($LASTEXITCODE -ne 0) { throw 'Bundled security tests failed' }
+          $zip=Join-Path (Get-Location) 'dist/ConvOS-Windows-Portable.zip'
+          Compress-Archive -Path (Join-Path $target '*') -DestinationPath $zip -CompressionLevel Optimal -Force
+          if (!(Test-Path $zip)) { throw 'Archive missing' }
+          Write-Host ('Portable archive bytes: '+(Get-Item $zip).Length)
+          Get-FileHash -Algorithm SHA256 $zip | Format-List
+      - name: Upload private-ready portable ZIP (demo only)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ConvOS-Windows-Portable
+          path: dist/ConvOS-Windows-Portable.zip
+          retention-days: 14
+          if-no-files-found: error
