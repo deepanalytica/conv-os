@@ -1,7 +1,7 @@
 name: Windows portable package
 on:
   push:
-    branches: [feat/windows-distribution-acquisition]
+    branches: [feat/windows-distribution-acquisition, feat/ui-meta-connectors]
   workflow_dispatch:
 permissions:
   contents: read
@@ -25,7 +25,7 @@ jobs:
           $ErrorActionPreference='Stop'
           $target=Join-Path (Get-Location) 'dist/ConvOS-Windows'
           New-Item -ItemType Directory -Force -Path $target | Out-Null
-          foreach($folder in @('src','public','scripts','docs','tests')) {
+          foreach($folder in @('src','public','scripts','docs','tests','edge')) {
             Copy-Item -Recurse -Force -Path $folder -Destination $target
           }
           foreach($file in @('package.json','AGENTS.md','README.md','ARCHITECTURE.md','DESIGN_SYSTEM.md','.env.example')) {
@@ -41,6 +41,8 @@ jobs:
           if (!(Test-Path (Join-Path $target 'src/commercial.js'))) { throw 'Commercial API missing' }
           if (!(Test-Path (Join-Path $target 'src/consent.js'))) { throw 'Privacy ledger missing' }
           if (!(Test-Path (Join-Path $target 'public/privacy-ui.js'))) { throw 'Privacy UI missing' }
+          if (!(Test-Path (Join-Path $target 'public/integrations-ui.js'))) { throw 'Meta connections UI missing' }
+          if (!(Test-Path (Join-Path $target 'edge/meta-gateway/src/index.js'))) { throw 'Meta gateway source missing' }
           if ((Test-Path (Join-Path $target '.local')) -or (Test-Path (Join-Path $target 'data'))) {
             throw 'Unexpected private data folder in package'
           }
