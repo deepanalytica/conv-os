@@ -79,7 +79,7 @@ test('control de regresión estática no reclama seguridad de producción',()=>{
 });
 test('regresión local: quitar sesión u abrir puerta de release produce DENY',()=>{
  const safe=baseline();
- const bypass={...safe,server:safe.server.replace('currentSession(req)','bypassSession(req)')};
+ const bypass={...safe,server:safe.server.replaceAll('currentSession(req)','bypassSession(req)')};
  const result=inspectBaseline(bypass);
  assert.equal(result.decision,'DENY');
  assert.equal(result.checks.find(x=>x.id==='B2').pass,false);
