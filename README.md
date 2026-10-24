@@ -90,3 +90,6 @@ La rama experimental `feat/windows-distribution-acquisition` crea un ZIP descarg
 
 La interfaz incluye estimación comercial por marca, costos directos y cotizaciones en borrador, **nunca facturación o utilidad confirmadas**. No contiene datos reales y no conecta cuentas Meta. Para procedimientos y bloqueos ver [Paquete Windows](docs/foundation/15-WINDOWS-PACKAGING.md). `main` conserva la demo estática.
 
+
+## UI v1 / Conexiones Meta seguras (rama de desarrollo)
+La rama `feat/ui-meta-connectors` incorpora rediseño de interfaz con marcas WAL/Visual Art AI, vista de autorización Meta por canal, gateway Cloudflare para webhooks firmados sin contenido de clientes, y consumidor outbound-only de metadatos con ACK/idempotencia. **No hay cuentas conectadas ni mensajes reales importados o enviados.** Guía: [Conectividad Meta y UI](docs/foundation/16-META-UX-CONNECTIVITY.md). El ZIP de Windows se recompila por GitHub Actions al actualizar la rama.
