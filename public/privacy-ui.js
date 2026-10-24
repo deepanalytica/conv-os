@@ -7,8 +7,9 @@ export function activateConsent({tenant,staticDemo,api,notify,escape,contacts}){
  function demoData(){try{const d=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(d)?d:[]}catch{return []}}
  function storeDemo(d){try{localStorage.setItem(key,JSON.stringify(d))}catch{}}
  function summaryFor(receipts){
-  const latest=[...receipts].reverse().find(x=>x.purpose==='marketing');
-  return latest?.decision==='opted_out'?'OPTED_OUT':latest?.decision==='claimed_opt_in'?'UNVERIFIED_CLAIM':'UNKNOWN';
+  const choices=receipts.filter(x=>x.purpose==='marketing');
+  if(choices.some(x=>x.decision==='opted_out'))return 'OPTED_OUT';
+  return choices.some(x=>x.decision==='claimed_opt_in')?'UNVERIFIED_CLAIM':'UNKNOWN';
  }
  let selected=contacts[0]?.id||'';
  async function load(){
