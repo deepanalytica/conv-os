@@ -1,7 +1,7 @@
 name: Fullstack CI
 on:
   push:
-    branches: [main, docs/praxios-meta-harness-foundation, feat/acquisition-os]
+    branches: [main, docs/praxios-meta-harness-foundation, feat/acquisition-os, feat/assurance-gates]
   pull_request:
     branches: [main, feat/acquisition-os, docs/praxios-meta-harness-foundation]
 permissions:
