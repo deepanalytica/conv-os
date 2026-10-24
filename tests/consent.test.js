@@ -45,7 +45,10 @@ test('opt-out es conservador y mantiene historia sin alterar otra empresa',async
  const get=await call('tenant-a',a);
  assert.equal(get.status,200);
  assert.equal(get.data.receipts.length,2);
- const other=await call('tenant-b',b);
+ const laterUnverified=await call('tenant-a',a,'POST',{channel:'facebook',purpose:'marketing',decision:'claimed_opt_in'});
+ assert.equal(laterUnverified.status,201);
+ assert.equal(laterUnverified.data.summary.marketing_permission,'OPTED_OUT');
+  const other=await call('tenant-b',b);
  assert.equal(other.data.receipts.length,0);
  assert.equal(other.data.summary.marketing_permission,'UNKNOWN');
 });
