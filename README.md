@@ -2,6 +2,16 @@
 
 **Sistema operativo empresarial construido alrededor de conversaciones.** Base horizontal para gastronomía, servicios, distribución y otros negocios que atienden por WhatsApp.
 
+## Desarrollo de Acquisition OS (rama feat/acquisition-os)
+
+Se agregó una primera capa de **CRM comercial multiempresa**, reutilizando el backend, las pruebas y la interfaz existente: WAL (regalos personalizados) y Visual Art AI (servicios digitales) comparten panel con espacios independientes. Incluye contactos, oportunidades, pipeline, métricas estimadas y alta manual de registros.
+
+**Para probar:** seleccionar una de las marcas en el panel y entrar a **Adquisición CRM**. En la demo pública, los registros viven solo en el navegador; en el backend local usan SQLite. No existen integraciones reales con Meta ni clientes de producción. **No usar para datos privados ni ventas reales.**
+
+Guía técnica, endpoints, riesgos y pasos siguientes: [Acquisition OS](docs/ACQUISITION-OS.md).
+
+
+
 > **Estado: MVP experimental v0.2. No utilizar con datos reales, pagos reales o clientes sin completar seguridad, autorización e integraciones.**
 
 ## Versión premium · octubre 2026
