@@ -119,3 +119,25 @@ test('CRM: valida canales, importes y autenticación',async()=>{
  const noToken=await call('/api/crm/contacts',{tenant:'demo-wal',token:'wrong'});
  assert.equal(noToken.status,401);
 });
+
+test('seguimientos manuales conservan aislamiento y estado de cumplimiento',async()=>{
+ const c=await call('/api/crm/contacts',{method:'POST',tenant:'demo-wal',body:{name:'Cliente de seguimiento',channel:'manual'}});
+ assert.equal(c.status,201);
+ const o=await call('/api/crm/opportunities',{method:'POST',tenant:'demo-wal',body:{contact_id:c.data.contact.id,title:'Pedido personalizado',amount_cents:1000000}});
+ assert.equal(o.status,201);
+ const due_at='2026-12-01T12:00:00.000Z';
+ const other=await call('/api/crm/followups',{tenant:'demo-vaa',method:'POST',body:{opportunity_id:o.data.opportunity.id,title:'No permitido',due_at}});
+ assert.equal(other.status,404);
+ const f=await call('/api/crm/followups',{tenant:'demo-wal',method:'POST',body:{opportunity_id:o.data.opportunity.id,title:'Confirmar diseño del pedido',due_at}});
+ assert.equal(f.status,201);
+ assert.equal(f.data.followup.status,'open');
+ const incorrectDate=await call('/api/crm/followups',{tenant:'demo-wal',method:'POST',body:{opportunity_id:o.data.opportunity.id,title:'Fecha incorrecta',due_at:'mañana'}});
+ assert.equal(incorrectDate.status,400);
+ const cross=await call('/api/crm/followups/'+f.data.followup.id+'/complete',{tenant:'demo-vaa',method:'POST',body:{}});
+ assert.equal(cross.status,404);
+ const done=await call('/api/crm/followups/'+f.data.followup.id+'/complete',{tenant:'demo-wal',method:'POST',body:{}});
+ assert.equal(done.status,200);
+ assert.equal(done.data.followup.status,'completed');
+ const duplicate=await call('/api/crm/followups/'+f.data.followup.id+'/complete',{tenant:'demo-wal',method:'POST',body:{}});
+ assert.equal(duplicate.status,409);
+});
