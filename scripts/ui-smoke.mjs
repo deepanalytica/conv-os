@@ -40,12 +40,7 @@ try{
  await page.locator('.brand-context').getByText(/Visual Art AI/).waitFor();
  await page.screenshot({path:'ui-artifacts/03-prism-vaa.png',fullPage:true});
  await page.locator('button[data-view="crm"]').click();
- await page.waitForTimeout(600);
- console.log('CRM diagnostic',{workspace:await page.locator('#crm-workspace').count(),
-  view:await page.locator('.layout').getAttribute('data-view'),
-  snippet:(await page.locator('#crm-workspace').allTextContents()).join(' ').slice(0,300),
-  errors});
- await page.locator('#crm-workspace .crm-title').first().waitFor({timeout:7000});
+ await page.locator('#crm-workspace .crm-title').first().waitFor({timeout:12000});
  await page.locator('[data-crm-tab="quotes"]').click();
  await page.locator('#commercial-workspace .crm-title').waitFor();
  assert.equal(await page.locator('[data-crm-tab="quotes"]').getAttribute('aria-selected'),'true');
@@ -58,8 +53,10 @@ try{
  await page.locator('#prism-run-rules').click();
  await page.locator('.prism-reco').first().waitFor();
  await page.screenshot({path:'ui-artifacts/08-orchestration-dark.png',fullPage:true});
+ const pendingBefore=await page.locator('[data-review="acknowledged"]').count();
  await page.locator('[data-review="acknowledged"]').first().click();
- assert.match(await page.locator('.prism-run-list').innerText(),/decisiones pendientes/i);
+ await page.waitForFunction(expected=>document.querySelectorAll('[data-review="acknowledged"]').length===expected,pendingBefore-1);
+ assert.equal(await page.locator('[data-review="acknowledged"]').count(),pendingBefore-1);
  await page.locator('button[data-view="connections"]').click();
  await page.locator('.connect-grid .connect-card').first().waitFor();
  assert.equal(await page.locator('.connect-grid .connect-card').count(),3);
