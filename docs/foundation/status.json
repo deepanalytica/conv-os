@@ -80,6 +80,11 @@
       "id": "F-ASSURANCE",
       "path": "docs/foundation/14-ASSURANCE-ENGINE.md",
       "status": "PROPOSED"
+    },
+    {
+      "id": "F-WINDOWS-DISTRIBUTION",
+      "path": "docs/foundation/15-WINDOWS-PACKAGING.md",
+      "status": "PROPOSED"
     }
   ],
   "deliverables": [
@@ -142,6 +147,22 @@
       "evidence": [
         "https://github.com/deepanalytica/conv-os/actions/runs/40051172129"
       ],
+      "owner": "codex+human"
+    },
+    {
+      "id": "P1-QUOTE-01",
+      "title": "Quote drafts, editable direct costs and projection with NO_DATA enforcement",
+      "state": "CODE_COMPLETE",
+      "reason": "CI Windows build and tests running; no real invoices or payment evidence",
+      "evidence": [],
+      "owner": "codex+human"
+    },
+    {
+      "id": "P0-WIN-BUILD",
+      "title": "Portable offline-first Windows x64 artifact with bundled Node runtime",
+      "state": "CODE_COMPLETE",
+      "reason": "GitHub Actions builds and tests ZIP; native Windows owner E2E not validated",
+      "evidence": [],
       "owner": "codex+human"
     }
   ],

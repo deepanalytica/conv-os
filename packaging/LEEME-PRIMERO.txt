@@ -1,0 +1,26 @@
+CONV OS / ACQUISITION OS - PAQUETE PORTATIL WINDOWS
+=================================================
+VERSION EXPERIMENTAL LOCAL. NO CERTIFICADA PARA DATOS REALES.
+
+1. Descomprime TODO el ZIP en una carpeta privada, de preferencia en
+   C:\Users\TU_USUARIO\ConvOS. No usar OneDrive publico ni carpetas compartidas.
+2. Protege tu equipo con Windows actualizado, cuenta personal y BitLocker.
+3. Haz doble clic en INICIO-CONV-OS.cmd
+4. Crea una clave larga y unica cuando se solicite.
+5. La interfaz se abre en http://127.0.0.1:4173
+6. Para detenerlo, cierra la terminal o usa Ctrl+C.
+
+DATOS
+- Los datos de ejemplo se almacenan localmente en data\ops.sqlite.
+- El codigo no esta conectado a Instagram, Facebook o WhatsApp real.
+- Tu numero de WhatsApp Business NO se modifica.
+- El archivo SQLite de trabajo NO esta cifrado por la aplicacion.
+- RESPALDO-CIFRADO.cmd crea un respaldo cifrado con frase propia.
+- Al cambiar de versiones respalda la carpeta data y .local antes.
+- NO subas data, backups o .local a GitHub.
+
+NO ES UN .EXE NATIVO: este paquete incluye Node.js Windows, scripts y la
+aplicacion lista para ejecutar sin instalar Node ni npm por separado.
+GitHub Actions construye el paquete desde el repositorio, sin datos reales.
+
+Consulta docs\LOCAL-WINDOWS.md para explicaciones y restricciones.

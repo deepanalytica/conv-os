@@ -7,6 +7,8 @@ import { randomUUID, createHmac, timingSafeEqual } from 'node:crypto';
 import { assertTransition, totalInCents, deliveryFee } from './domain.js';
 import {initCrm,seedCrmDemo,handleCrm} from './crm.js';
 import {initFollowups,handleFollowups} from './followups.js';
+import {initCommercial,handleCommercial} from './commercial.js';
+import {initConsent,handleConsent} from './consent.js';
 import {getLocalPasswordHash,isLoopback,isLocalHost,allowedOrigin,currentSession,startSession,makeSessionCookie,clearSessionCookie,endSession,validCsrf} from './security.js';
 
 const root=resolve(fileURLToPath(new URL('../',import.meta.url)));
@@ -53,6 +55,8 @@ for(const [tenant,id,name,price] of [
 ])db.prepare('INSERT OR IGNORE INTO products(id,tenant_id,name,price_cents,available) VALUES (?,?,?,?,1)').run(id,tenant,name,price);
 initCrm(db);
 initFollowups(db);
+initCommercial(db);
+initConsent(db);
 if(demo)seedCrmDemo(db);
 
 function tenantRequired(req){
@@ -144,6 +148,8 @@ export function createServer(){
     const tenant=tenantRequired(req);
     if(await handleCrm({db,req,res,path,tenant,json,limited,checkedJson}))return;
     if(await handleFollowups({db,req,res,path,tenant,json,limited,checkedJson}))return;
+    if(await handleCommercial({db,req,res,path,tenant,json,limited,checkedJson}))return;
+    if(await handleConsent({db,req,res,path,tenant,json,limited,checkedJson}))return;
     if(path==='/api/overview'&&req.method==='GET'){
      const count=db.prepare("SELECT status,COUNT(*) n FROM orders WHERE tenant_id=? GROUP BY status").all(tenant);
      const sales=db.prepare("SELECT COALESCE(SUM(total_cents),0) v FROM orders WHERE tenant_id=? AND verified_at IS NOT NULL").get(tenant);
@@ -185,7 +191,7 @@ export function createServer(){
    const file=path==='/'?(session?'index.html':'login.html'):path.slice(1);
    if(!session&&!['login.html','login.js','login.css','favicon.svg'].includes(file))
     return json(res,401,{error:'Acceso privado: inicia sesión'});
-   const allowed=/^(?:index\.html|login\.html|login\.js|login\.css|app\.js|crm-ui\.js|crm-ui\.css|styles\.css|premium\.css|theme\.css|theme\.js|favicon\.svg|landing\/(?:index\.html|landing\.css|landing\.js)|assets\/[a-z0-9_-]+\.svg)$/;
+   const allowed=/^(?:index\.html|login\.html|login\.js|login\.css|app\.js|crm-ui\.js|commercial-ui\.js|privacy-ui\.js|crm-ui\.css|styles\.css|premium\.css|theme\.css|theme\.js|favicon\.svg|landing\/(?:index\.html|landing\.css|landing\.js)|assets\/[a-z0-9_-]+\.svg)$/;
    if(!allowed.test(file))return json(res,404,{error:'Archivo no encontrado'});
    const bytes=readFileSync(join(staticDir,file));
    res.writeHead(200,{'content-type':types[extname(file)]||'application/octet-stream','cache-control':'no-cache'});
