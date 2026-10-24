@@ -46,7 +46,7 @@ export function isLocalHost(host){
 export function allowedOrigin(req){
  const origin=req.headers.origin;
  if(!origin)return true;
- try{const parsed=new URL(origin);return parsed.protocol==='http:' && isLocalHost(parsed.host)}catch{return false}
+ try{const parsed=new URL(origin);return parsed.protocol==='http:' && isLocalHost(parsed.host) && parsed.host===req.headers.host}catch{return false}
 }
 function parseCookie(header){
  const match=String(header||'').split(';').map(s=>s.trim()).find(s=>s.startsWith(COOKIE+'='));
