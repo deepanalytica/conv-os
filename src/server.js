@@ -7,6 +7,7 @@ import { randomUUID, createHmac, timingSafeEqual } from 'node:crypto';
 import { assertTransition, totalInCents, deliveryFee } from './domain.js';
 import {initCrm,seedCrmDemo,handleCrm} from './crm.js';
 import {initFollowups,handleFollowups} from './followups.js';
+import {initCommercial,handleCommercial} from './commercial.js';
 import {getLocalPasswordHash,isLoopback,isLocalHost,allowedOrigin,currentSession,startSession,makeSessionCookie,clearSessionCookie,endSession,validCsrf} from './security.js';
 
 const root=resolve(fileURLToPath(new URL('../',import.meta.url)));
@@ -53,6 +54,7 @@ for(const [tenant,id,name,price] of [
 ])db.prepare('INSERT OR IGNORE INTO products(id,tenant_id,name,price_cents,available) VALUES (?,?,?,?,1)').run(id,tenant,name,price);
 initCrm(db);
 initFollowups(db);
+initCommercial(db);
 if(demo)seedCrmDemo(db);
 
 function tenantRequired(req){
@@ -144,6 +146,7 @@ export function createServer(){
     const tenant=tenantRequired(req);
     if(await handleCrm({db,req,res,path,tenant,json,limited,checkedJson}))return;
     if(await handleFollowups({db,req,res,path,tenant,json,limited,checkedJson}))return;
+    if(await handleCommercial({db,req,res,path,tenant,json,limited,checkedJson}))return;
     if(path==='/api/overview'&&req.method==='GET'){
      const count=db.prepare("SELECT status,COUNT(*) n FROM orders WHERE tenant_id=? GROUP BY status").all(tenant);
      const sales=db.prepare("SELECT COALESCE(SUM(total_cents),0) v FROM orders WHERE tenant_id=? AND verified_at IS NOT NULL").get(tenant);
