@@ -1,6 +1,7 @@
 import {DatabaseSync} from 'node:sqlite';
 import {existsSync} from 'node:fs';
 import {resolve} from 'node:path';
+import {pathToFileURL} from 'node:url';
 import {initChannelEvents,importMetaReceipt} from '../src/channel-events.js';
 
 // Explicit, one-shot, OUTBOUND ONLY pull. No exposed local HTTP port.
@@ -55,7 +56,7 @@ export async function pullOnce(db,{fetchImpl=fetch,accountId,queueId,apiToken}){
  }
  return {imported:result.imported,received:payload.result.messages.length,retried:result.retries.length};
 }
-if(import.meta.url===new URL('file://'+resolve(process.argv[1]||'')).href){
+if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).href){
  if(process.env.ENABLE_META_METADATA_PULL!=='true'){
   console.error('Cloudflare pull disabled. See edge/meta-gateway/README.md.');
   process.exitCode=1;
