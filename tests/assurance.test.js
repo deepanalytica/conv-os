@@ -92,3 +92,22 @@ test('regresión local: quitar sesión u abrir puerta de release produce DENY',(
  const released={...safe,manifest:{...safe.manifest,release_gate:{state:'RELEASED'}}};
  assert.equal(inspectBaseline(released).decision,'DENY');
 });
+
+test('los contratos JSON y el ejemplo coinciden con el evaluador real',()=>{
+ const step=JSON.parse(read('docs/foundation/schemas/step-proposal.schema.json'));
+ const gate=JSON.parse(read('docs/foundation/schemas/gate-decision.schema.json'));
+ const example=JSON.parse(read('docs/foundation/templates/step-proposal.example.json'));
+ assert.equal(step.type,'object');
+ assert.equal(step.additionalProperties,false);
+ assert.ok(step.required.includes('policy_digest'));
+ assert.deepEqual(gate.properties.decision.enum,['ALLOW','REVIEW','DENY']);
+ assert.deepEqual(step.properties.capability.enum.sort(),[
+  'repo.read','docs.read','local.check','repo.write.branch','docs.write','github.pr.create',
+  'meta.message.send','meta.account.connect','payments.capture','advertising.spend',
+  'production.deploy','whatsapp.number.migrate','secrets.export'
+ ].sort());
+ assert.equal(example.policy_digest,POLICY_DIGEST);
+ const decision=assessStep(example,{knownRequirements:ids});
+ assert.equal(decision.decision,'ALLOW');
+ assert.equal(decision.may_execute,true);
+});
