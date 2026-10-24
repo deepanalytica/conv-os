@@ -30,9 +30,17 @@ try{
  assert.equal(await page.locator('#tenant-select').inputValue(),'demo-wal');
  await page.screenshot({path:'ui-artifacts/01-wal-desktop.png',fullPage:true});
  await page.locator('#tenant-select').selectOption('demo-vaa');
- await page.locator('#commercial-workspace .crm-title').waitFor();
+ await page.locator('#commercial-workspace .crm-title').waitFor({state:'attached'});
+ await page.locator('.brand-context').getByText(/Visual Art AI/).waitFor();
  assert.match(await page.locator('.brand-context').innerText(),/Visual Art AI/);
  await page.screenshot({path:'ui-artifacts/02-visual-art-ai-desktop.png',fullPage:true});
+ await page.locator('[data-crm-tab="quotes"]').click();
+ await page.locator('#commercial-workspace .crm-title').waitFor();
+ assert.equal(await page.locator('[data-crm-tab="quotes"]').getAttribute('aria-selected'),'true');
+ await page.screenshot({path:'ui-artifacts/06-cotizaciones-desktop.png',fullPage:true});
+ await page.locator('[data-crm-tab="privacy"]').click();
+ await page.locator('#consent-workspace .crm-title').waitFor();
+ await page.screenshot({path:'ui-artifacts/07-privacidad-desktop.png',fullPage:true});
  await page.locator('button[data-view="connections"]').click();
  await page.locator('.connect-grid .connect-card').first().waitFor();
  assert.equal(await page.locator('.connect-grid .connect-card').count(),3);
@@ -51,7 +59,7 @@ try{
  assert.ok(horiz.scroll<=horiz.width+3,'Unintended global horizontal scroll: '+JSON.stringify(horiz));
  assert.equal(errors.length,0,'Unhandled browser exceptions: '+errors.join('; '));
  console.log('UI smoke passed: login, WAL/Visual Art AI, CRM, Meta integrations, mobile at 390 px.');
- console.log('Screenshots captured: 5; data is synthetic only.');
+ console.log('Screenshots captured: 7; data is synthetic only.');
 }finally{
  if(browser)await browser.close();
  await new Promise(resolve=>server.close(resolve));
