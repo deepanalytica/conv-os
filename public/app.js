@@ -196,7 +196,7 @@ function bind(){
  $('#add-order')?.addEventListener('click',()=>{state.modal=true;render()});
  $('#close-modal')?.addEventListener('click',()=>{state.modal=false;render()});
  $('#new-order')?.addEventListener('submit',createOrder);
- document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{state.view=b.dataset.view;state.filter='all';render()}));
+ document.querySelectorAll('button[data-view]').forEach(b=>b.addEventListener('click',()=>{state.view=b.dataset.view;state.filter='all';render()}));
  document.querySelectorAll('[data-filter]').forEach(b=>b.addEventListener('click',()=>{state.filter=b.dataset.filter;render()}));
  document.querySelectorAll('[data-chat-order]').forEach(b=>b.addEventListener('click',()=>{state.chatOrder=b.dataset.chatOrder;render()}));
  document.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('click',()=>mutate(b.dataset.action,b.dataset.id,b.dataset.next)));
