@@ -82,3 +82,11 @@ GitHub Pages **no ejecuta Node ni SQLite**. Cloudflare Workers + D1 podría ser 
 [PRD](PRD.md) · [Arquitectura](ARCHITECTURE.md) · [Design System](DESIGN_SYSTEM.md) · [Agentes](AGENTS.md) · [Despliegue](docs/DEPLOYMENT.md).
 
 La marca es provisional. El producto se configura para cada empresa, no está ligado a ningún restaurante.
+
+
+## Windows sin instalar Node: paquete portable de demostración
+
+La rama experimental `feat/windows-distribution-acquisition` crea un ZIP descargable mediante el workflow [Windows portable package](https://github.com/deepanalytica/conv-os/actions/workflows/windows-portable.yml), con `node.exe` y los recursos locales necesarios. Descomprimir y abrir `INICIO-CONV-OS.cmd`.
+
+La interfaz incluye estimación comercial por marca, costos directos y cotizaciones en borrador, **nunca facturación o utilidad confirmadas**. No contiene datos reales y no conecta cuentas Meta. Para procedimientos y bloqueos ver [Paquete Windows](docs/foundation/15-WINDOWS-PACKAGING.md). `main` conserva la demo estática.
+
