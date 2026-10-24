@@ -11,8 +11,7 @@ export function encryptBackup(data,password){
  const salt=randomBytes(32),iv=randomBytes(12);
  const cipher=createCipheriv('aes-256-gcm',derive(password,salt),iv);
  cipher.setAAD(HEADER);
- return Buffer.concat([HEADER,salt,iv,cipher.getAuthTag?.()??Buffer.alloc(0)]).length===0
-  ?Buffer.alloc(0):assemble(cipher,data,salt,iv);
+ return assemble(cipher,data,salt,iv);
 }
 function assemble(cipher,data,salt,iv){
  const ciphertext=Buffer.concat([cipher.update(data),cipher.final()]);
