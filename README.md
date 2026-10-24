@@ -93,3 +93,6 @@ La interfaz incluye estimación comercial por marca, costos directos y cotizacio
 
 ## UI v1 / Conexiones Meta seguras (rama de desarrollo)
 La rama `feat/ui-meta-connectors` incorpora rediseño de interfaz con marcas WAL/Visual Art AI, vista de autorización Meta por canal, gateway Cloudflare para webhooks firmados sin contenido de clientes, y consumidor outbound-only de metadatos con ACK/idempotencia. **No hay cuentas conectadas ni mensajes reales importados o enviados.** Guía: [Conectividad Meta y UI](docs/foundation/16-META-UX-CONNECTIVITY.md). El ZIP de Windows se recompila por GitHub Actions al actualizar la rama.
+
+## Acquisition OS Prism (rama experimental)
+Se añadió el [centro de mando Aurora Glass](docs/foundation/17-PRISM-OPERATING-SYSTEM.md) en temas claro y oscuro, con analítica de registros locales, ontología canónica, recomendaciones deterministas, auditoría e idempotencia. Inicia el paquete Windows en localhost y utiliza **Centro de mando**, **CRM**, **Inteligencia comercial** y **Orquestación**. Todas las conexiones Meta y pagos reales permanecen deshabilitados hasta aprobación oficial.

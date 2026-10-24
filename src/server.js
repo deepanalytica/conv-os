@@ -11,6 +11,7 @@ import {initCommercial,handleCommercial} from './commercial.js';
 import {initConsent,handleConsent} from './consent.js';
 import {handleIntegrations} from './integrations.js';
 import {initChannelEvents} from './channel-events.js';
+import {initOperatingSystem,handleOperatingSystem} from './operating-system.js';
 import {getLocalPasswordHash,isLoopback,isLocalHost,allowedOrigin,currentSession,startSession,makeSessionCookie,clearSessionCookie,endSession,validCsrf} from './security.js';
 
 const root=resolve(fileURLToPath(new URL('../',import.meta.url)));
@@ -60,6 +61,7 @@ initFollowups(db);
 initCommercial(db);
 initConsent(db);
 initChannelEvents(db);
+initOperatingSystem(db);
 if(demo)seedCrmDemo(db);
 
 function tenantRequired(req){
@@ -154,6 +156,7 @@ export function createServer(){
     if(await handleCommercial({db,req,res,path,tenant,json,limited,checkedJson}))return;
     if(await handleConsent({db,req,res,path,tenant,json,limited,checkedJson}))return;
     if(await handleIntegrations({db,tenant,req,res,path,json}))return;
+    if(await handleOperatingSystem({db,req,res,path,url,tenant,json,limited,checkedJson}))return;
     if(path==='/api/overview'&&req.method==='GET'){
      const count=db.prepare("SELECT status,COUNT(*) n FROM orders WHERE tenant_id=? GROUP BY status").all(tenant);
      const sales=db.prepare("SELECT COALESCE(SUM(total_cents),0) v FROM orders WHERE tenant_id=? AND verified_at IS NOT NULL").get(tenant);
@@ -195,7 +198,7 @@ export function createServer(){
    const file=path==='/'?(session?'index.html':'login.html'):path.slice(1);
    if(!session&&!['login.html','login.js','login.css','favicon.svg'].includes(file))
     return json(res,401,{error:'Acceso privado: inicia sesión'});
-   const allowed=/^(?:index\.html|login\.html|login\.js|login\.css|app\.js|crm-ui\.js|commercial-ui\.js|privacy-ui\.js|integrations-ui\.js|crm-ui\.css|workspace-v1\.css|styles\.css|premium\.css|theme\.css|theme\.js|favicon\.svg|landing\/(?:index\.html|landing\.css|landing\.js)|assets\/[a-z0-9_-]+\.svg)$/;
+   const allowed=/^(?:index\.html|login\.html|login\.js|login\.css|app\.js|crm-ui\.js|commercial-ui\.js|privacy-ui\.js|integrations-ui\.js|crm-ui\.css|workspace-v1\.css|prism-os\.css|insights-ui\.js|orchestration-ui\.js|styles\.css|premium\.css|theme\.css|theme\.js|favicon\.svg|landing\/(?:index\.html|landing\.css|landing\.js)|assets\/[a-z0-9_-]+\.svg)$/;
    if(!allowed.test(file))return json(res,404,{error:'Archivo no encontrado'});
    const bytes=readFileSync(join(staticDir,file));
    res.writeHead(200,{'content-type':types[extname(file)]||'application/octet-stream','cache-control':'no-cache'});

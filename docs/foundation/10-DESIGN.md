@@ -20,6 +20,19 @@
 - **Assurance:** panel de gates, riesgos y verificaciones; muestra acciones observables y logs, nunca razonamiento interno privado de LLM.
 - **Configuración:** cuentas Meta, estado OAuth, propietarios, políticas de consentimiento, retención, backups y seguridad.
 
+## Evolución Aurora Glass / Prism OS (implementada en rama de desarrollo)
+
+Se propone sustituir el color carbón plano por una dirección viva con superficies translúcidas, acentos tornasol y gráficas conectadas a fuentes verificables. El código está en `public/prism-os.css`, `public/insights-ui.js` y `public/orchestration-ui.js`.
+
+- Tema oscuro obsidiana y tema claro perla con tokens semánticos compartidos.
+- Jerarquía comercial: KPI → tendencia → pipeline → tareas → estado de evidencia.
+- WAL / Visual Art AI comparten componentes; no comparten registros.
+- Cero métricas inventadas en la aplicación local. Solo la demo pública puede usar fixtures, etiquetados como sintéticos.
+- `prefers-reduced-motion`, foco teclado, textos complementarios al color, contrastes legibles.
+- Sin librerías de animación, gráficos, fuentes externas ni motor 3D añadido innecesariamente.
+
+[Contratos completos Aurora Glass / OS](17-PRISM-OPERATING-SYSTEM.md).
+
 ## Dirección de arte
 Sistema visual existente: superficies carbón `#090f19`, tarjetas `#111c2b`, acción `#65e3b2`, advertencia `#f6b55a`, error `#ef7979`, texto `#f3f8fc` y secundario `#96a9bd`. Escala base 4px, controles táctiles mínimos 44px, tipografías DM Sans/Plus Jakarta Sans si están disponibles. Documentar tokens compartidos antes de añadir gradientes, animaciones o librerías.
 

@@ -1,7 +1,7 @@
 name: UI visual review
 on:
   push:
-    branches: [feat/ui-meta-connectors]
+    branches: [feat/ui-meta-connectors, feat/prism-acquisition-os]
   workflow_dispatch:
 permissions:
   contents: read
