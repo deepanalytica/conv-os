@@ -19,7 +19,7 @@ test('salud y acceso protegido',async()=>{
  assert.equal((await call('/api/health')).status,200);
  assert.equal((await call('/api/tenants',{token:'wrong'})).status,401);
  const tenants=await call('/api/tenants');
- assert.equal(tenants.data.tenants.length,3);
+ assert.equal(tenants.data.tenants.length,5);
 });
 test('pedido cotizado y aislado por empresa',async()=>{
  const created=await call('/api/orders',{method:'POST',body:{customer:'Cliente de prueba',items:[{productId:'p1',qty:2}]}});
@@ -53,4 +53,43 @@ test('Meta webhook invalida firmas incorrectas y evita mensajes duplicados',asyn
  }
  const list=await call('/api/messages');
  assert.equal(list.data.messages.length,1);
+});
+
+test('CRM: contactos y oportunidades están aislados por empresa',async()=>{
+ const contact=await call('/api/crm/contacts',{method:'POST',tenant:'demo-wal',body:{name:'Contacto de prueba',channel:'instagram'}});
+ assert.equal(contact.status,201);
+ assert.equal(contact.data.contact.consent_status,'unknown');
+ const contactId=contact.data.contact.id;
+ const wrongTenant=await call('/api/crm/opportunities',{method:'POST',tenant:'demo-vaa',body:{contact_id:contactId,title:'No permitido',amount_cents:1000}});
+ assert.equal(wrongTenant.status,404);
+ const created=await call('/api/crm/opportunities',{method:'POST',tenant:'demo-wal',body:{contact_id:contactId,title:'Tazón personalizado',amount_cents:1999000,source:'manual'}});
+ assert.equal(created.status,201);
+ assert.equal(created.data.opportunity.stage,'new');
+ const id=created.data.opportunity.id;
+ const crossList=await call('/api/crm/opportunities',{tenant:'demo-vaa'});
+ assert.ok(crossList.data.opportunities.every(x=>x.id!==id));
+ const crossUpdate=await call('/api/crm/opportunities/'+id+'/stage',{method:'POST',tenant:'demo-vaa',body:{stage:'qualified'}});
+ assert.equal(crossUpdate.status,404);
+ const leap=await call('/api/crm/opportunities/'+id+'/stage',{method:'POST',tenant:'demo-wal',body:{stage:'won'}});
+ assert.equal(leap.status,400);
+ for(const stage of ['qualified','proposal','won']){
+  const update=await call('/api/crm/opportunities/'+id+'/stage',{method:'POST',tenant:'demo-wal',body:{stage}});
+  assert.equal(update.status,200);
+  assert.equal(update.data.opportunity.stage,stage);
+ }
+ const repeat=await call('/api/crm/opportunities/'+id+'/stage',{method:'POST',tenant:'demo-wal',body:{stage:'won'}});
+ assert.equal(repeat.status,400);
+ const overview=await call('/api/crm/overview',{tenant:'demo-wal'});
+ assert.equal(overview.status,200);
+ assert.ok(overview.data.wonEstimatedCents>=1999000);
+});
+test('CRM: valida canales, importes y autenticación',async()=>{
+ const invalidChannel=await call('/api/crm/contacts',{method:'POST',tenant:'demo-wal',body:{name:'X',channel:'sms'}});
+ assert.equal(invalidChannel.status,400);
+ const c=await call('/api/crm/contacts',{tenant:'demo-wal'});
+ const valid=c.data.contacts[0];
+ const negative=await call('/api/crm/opportunities',{method:'POST',tenant:'demo-wal',body:{contact_id:valid.id,title:'Precio inválido',amount_cents:-10}});
+ assert.equal(negative.status,400);
+ const noToken=await call('/api/crm/contacts',{tenant:'demo-wal',token:'wrong'});
+ assert.equal(noToken.status,401);
 });
