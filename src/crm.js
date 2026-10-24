@@ -73,13 +73,14 @@ export function seedCrmDemo(db){
  ];
  const available=db.prepare('SELECT id FROM tenants WHERE id=?');
  const exists=db.prepare('SELECT id FROM crm_contacts WHERE tenant_id=? LIMIT 1');
+ const populated=new Set(['demo-wal','demo-vaa'].filter(t=>exists.get(t)));
  const now=new Date().toISOString();
  const insertContact=db.prepare('INSERT INTO crm_contacts (id,tenant_id,name,channel,created_at) VALUES (?,?,?,?,?)');
  const insertOpportunity=db.prepare('INSERT INTO crm_opportunities (id,tenant_id,contact_id,title,amount_cents,stage,source,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?)');
  for(const [tenant,name,channel,title,amount,stage] of examples){
   if(!available.get(tenant))continue;
   // Fixtures solo para empresas sin contactos. No mezclar con datos incorporados.
-  if(exists.get(tenant))continue;
+  if(populated.has(tenant))continue;
   const contactId=randomUUID();
   insertContact.run(contactId,tenant,name,channel,now);
   insertOpportunity.run(randomUUID(),tenant,contactId,title,amount,stage,'demostración',now,now);
