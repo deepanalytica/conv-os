@@ -40,6 +40,8 @@ test('no hay acceso por token demo y existe login seguro',async()=>{
   h.on('error',reject);h.end();
  });
  assert.equal(hostStatus,403);
+ const foreignOrigin=await fetch(url+'/api/crm/contacts',{method:'POST',headers:{cookie,'x-tenant-id':'demo-wal','x-csrf-token':csrf,'content-type':'application/json',origin:'http://localhost:5555'},body:JSON.stringify({name:'No autorizado',channel:'manual'})});
+ assert.equal(foreignOrigin.status,403);
 });
 test('salud y acceso protegido',async()=>{
  assert.equal((await call('/api/health')).status,200);
