@@ -14,28 +14,70 @@ concurrency:
   group: pages
   cancel-in-progress: true
 jobs:
-  publish-demo:
+  validate-and-publish:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - name: Prepare static demo artifact
+      - name: Check out approved public-demo source (no private backend is published)
+        uses: actions/checkout@v4
+        with:
+          ref: feat/public-prism-demo
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.13.0'
+      - name: Verify project contracts
+        run: npm run check
+      - name: Assemble safe static website (never publish backend)
         run: |
-          test -f public/index.html
-          test -f public/app.js
-          test -f public/styles.css
-          test -f public/premium.css
-          test -f public/landing/index.html
-          test -f public/landing/landing.css
-          test -f public/landing/landing.js
-          touch public/.nojekyll
-      - uses: actions/configure-pages@v5
+          set -euo pipefail
+          mkdir -p _site
+          cp -a public/. _site/
+          rm -f _site/login.html _site/login.js _site/login.css
+          touch _site/.nojekyll
+          python3 - <<'PY'
+          from pathlib import Path
+          index=Path('_site/index.html')
+          content=index.read_text()
+          assert '<html lang="es">' in content
+          content=content.replace('<html lang="es">','<html lang="es" data-public-demo="true">',1)
+          content=content.replace('Acquisition OS · Centro de operaciones',
+            'Acquisition OS Prism · Demo interactiva (datos ficticios)')
+          content=content.replace('Conversation Ops: sistema operativo empresarial para conversaciones, pedidos y operaciones comerciales.',
+            'Demo interactiva del sistema operativo comercial Acquisition OS Prism: CRM, analítica, cotizaciones y gestión, sin información real de clientes.')
+          index.write_text(content)
+          PY
+          test -f _site/app.js
+          test -f _site/demo-fixtures.js
+          test -f _site/insights-ui.js
+          test -f _site/prism-os.css
+          test -f _site/orchestration-ui.js
+          test ! -e _site/src
+          test ! -e _site/.local
+          test ! -e _site/data
+          test ! -e _site/login.html
+          if grep -R -E -- '-----BEGIN (RSA|OPENSSH|PRIVATE) KEY-----' _site; then
+            echo 'Potential private key in published artifact' >&2
+            exit 1
+          fi
+          du -sh _site
+      - name: Install Chromium for actual published-artifact smoke test
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.56.1
+          npx playwright install chromium --with-deps
+      - name: Verify all public demo views and zero backend requests
+        run: node scripts/public-demo-smoke.mjs
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
         with:
           enablement: true
-      - uses: actions/upload-pages-artifact@v3
+      - name: Upload public-site artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          path: public
+          path: _site
       - id: deployment
+        name: Publish live website
         uses: actions/deploy-pages@v4
