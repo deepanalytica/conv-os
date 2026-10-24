@@ -1,0 +1,21 @@
+# TEMPLATE ONLY. DO NOT DEPLOY without creating a D1 database, queue and Meta app.
+name = "conv-os-meta-inbound"
+main = "src/index.js"
+compatibility_date = "2026-10-23"
+workers_dev = false
+
+[vars]
+ENABLE_META_INBOUND = "false"
+
+[[d1_databases]]
+binding = "ACCOUNTS"
+database_name = "conv-os-meta-accounts"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+
+[[queues.producers]]
+binding = "INBOUND_EVENTS"
+queue = "conv-os-meta-inbound"
+
+# Set secrets via "wrangler secret put": META_APP_SECRET, META_VERIFY_TOKEN,
+# HASH_KEY (distinct random 256-bit secret). Never commit these to the repo.
+# Queue consumers require separate, reviewed Cloudflare authentication.

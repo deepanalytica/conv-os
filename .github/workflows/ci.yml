@@ -1,7 +1,7 @@
 name: Fullstack CI
 on:
   push:
-    branches: [main, docs/praxios-meta-harness-foundation, feat/acquisition-os, feat/assurance-gates]
+    branches: [main, docs/praxios-meta-harness-foundation, feat/acquisition-os, feat/assurance-gates, feat/ui-meta-connectors]
   pull_request:
     branches: [main, feat/acquisition-os, docs/praxios-meta-harness-foundation]
 permissions:
@@ -35,6 +35,13 @@ jobs:
           test -f public/commercial-ui.js
           test -f src/consent.js
           test -f public/privacy-ui.js
+          test -f public/integrations-ui.js
+          test -f public/workspace-v1.css
+          test -f src/integrations.js
+          test -f src/channel-events.js
+          test -f scripts/pull-meta-metadata.mjs
+          test -f edge/meta-gateway/migrations/0001_accounts.sql
+          test -f edge/meta-gateway/src/index.js
           test -f scripts/backup-local.mjs
           test -f scripts/restore-local.mjs
           test -f scripts/secret-input.mjs

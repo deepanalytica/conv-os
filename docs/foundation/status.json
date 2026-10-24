@@ -85,6 +85,11 @@
       "id": "F-WINDOWS-DISTRIBUTION",
       "path": "docs/foundation/15-WINDOWS-PACKAGING.md",
       "status": "PROPOSED"
+    },
+    {
+      "id": "F-META-UX",
+      "path": "docs/foundation/16-META-UX-CONNECTIVITY.md",
+      "status": "PROPOSED"
     }
   ],
   "deliverables": [
@@ -128,9 +133,10 @@
     {
       "id": "P2-02",
       "title": "Signed gateway and local pull architecture",
-      "state": "NOT_STARTED",
+      "state": "CODE_COMPLETE",
       "evidence": [],
-      "owner": "codex"
+      "owner": "codex",
+      "reason": "Code only: signed metadata-only Cloudflare ingress and opt-in Windows queue pull implemented; NOT deployed, no OAuth or real message inbox"
     },
     {
       "id": "P3-01",
@@ -162,6 +168,14 @@
       "title": "Portable offline-first Windows x64 artifact with bundled Node runtime",
       "state": "CODE_COMPLETE",
       "reason": "GitHub Actions builds and tests ZIP; native Windows owner E2E not validated",
+      "evidence": [],
+      "owner": "codex+human"
+    },
+    {
+      "id": "P1-UI-REDESIGN",
+      "title": "Professional multi-brand UI and truthful connection readiness",
+      "state": "CODE_COMPLETE",
+      "reason": "Responsive CSS and local status route implemented; no browser E2E run on owner PC",
       "evidence": [],
       "owner": "codex+human"
     }
