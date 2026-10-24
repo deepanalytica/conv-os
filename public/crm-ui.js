@@ -1,3 +1,4 @@
+import {activateCommercial} from './commercial-ui.js';
 const pipeline=[
  ['new','Nuevo'],['qualified','Calificado'],['proposal','Propuesta'],
  ['negotiation','Negociación'],['won','Ganado'],['lost','Perdido']
@@ -106,7 +107,8 @@ export async function activateCrm({tenant,staticDemo,api,notify,escape,pesos}){
       </div>`).join('')||'<div class="crm-empty">No hay tareas abiertas</div>'}
      </div>
     </section>
-   </div>`;
+   </div><section id="commercial-workspace" aria-label="Cotizaciones comerciales" class="crm-workspace"></section>`;
+  activateCommercial({tenant,staticDemo,api,notify,escape,pesos,opportunities:data.opportunities});
  }
  try{data=await load();draw()}catch(e){renderError(e);return}
  node.addEventListener('submit',async e=>{
