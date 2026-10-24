@@ -10,6 +10,7 @@ import {initFollowups,handleFollowups} from './followups.js';
 import {initCommercial,handleCommercial} from './commercial.js';
 import {initConsent,handleConsent} from './consent.js';
 import {handleIntegrations} from './integrations.js';
+import {initChannelEvents} from './channel-events.js';
 import {getLocalPasswordHash,isLoopback,isLocalHost,allowedOrigin,currentSession,startSession,makeSessionCookie,clearSessionCookie,endSession,validCsrf} from './security.js';
 
 const root=resolve(fileURLToPath(new URL('../',import.meta.url)));
@@ -58,6 +59,7 @@ initCrm(db);
 initFollowups(db);
 initCommercial(db);
 initConsent(db);
+initChannelEvents(db);
 if(demo)seedCrmDemo(db);
 
 function tenantRequired(req){
@@ -151,7 +153,7 @@ export function createServer(){
     if(await handleFollowups({db,req,res,path,tenant,json,limited,checkedJson}))return;
     if(await handleCommercial({db,req,res,path,tenant,json,limited,checkedJson}))return;
     if(await handleConsent({db,req,res,path,tenant,json,limited,checkedJson}))return;
-    if(await handleIntegrations({req,res,path,json}))return;
+    if(await handleIntegrations({db,tenant,req,res,path,json}))return;
     if(path==='/api/overview'&&req.method==='GET'){
      const count=db.prepare("SELECT status,COUNT(*) n FROM orders WHERE tenant_id=? GROUP BY status").all(tenant);
      const sales=db.prepare("SELECT COALESCE(SUM(total_cents),0) v FROM orders WHERE tenant_id=? AND verified_at IS NOT NULL").get(tenant);
