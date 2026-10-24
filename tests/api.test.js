@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHmac} from 'node:crypto';
+import {request} from 'node:http';
 import {passwordHash} from '../src/security.js';
 process.env.DB_PATH=':memory:';
 process.env.DEMO_MODE='true';
@@ -34,8 +35,11 @@ test('no hay acceso por token demo y existe login seguro',async()=>{
  csrf=(await session.json()).csrf;
  const denied=await fetch(url+'/api/crm/contacts',{method:'POST',headers:{cookie,'x-tenant-id':'demo-wal','content-type':'application/json'},body:JSON.stringify({name:'Bad',channel:'manual'})});
  assert.equal(denied.status,403);
- const host=await fetch(url+'/api/health',{headers:{host:'evil.com'}});
- assert.equal(host.status,403);
+ const hostStatus=await new Promise((resolve,reject)=>{
+  const h=request(url+'/api/health',{headers:{Host:'evil.com'}},res=>{res.resume();res.on('end',()=>resolve(res.statusCode))});
+  h.on('error',reject);h.end();
+ });
+ assert.equal(hostStatus,403);
 });
 test('salud y acceso protegido',async()=>{
  assert.equal((await call('/api/health')).status,200);
