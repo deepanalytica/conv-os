@@ -45,8 +45,11 @@ jobs:
           & (Join-Path $target 'node.exe') --check (Join-Path $target 'src/server.js')
           if ($LASTEXITCODE -ne 0) { throw 'Bundled runtime verification failed' }
           $targetNode=Join-Path $target 'node.exe'
-          & $targetNode --experimental-sqlite --test (Join-Path $target 'tests/security.test.js')
-          if ($LASTEXITCODE -ne 0) { throw 'Bundled security tests failed' }
+          Push-Location $target
+          try {
+            & $targetNode --experimental-sqlite --test
+            if ($LASTEXITCODE -ne 0) { throw 'Bundled full tests failed' }
+          } finally { Pop-Location }
           $zip=Join-Path (Get-Location) 'dist/ConvOS-Windows-Portable.zip'
           Compress-Archive -Path (Join-Path $target '*') -DestinationPath $zip -CompressionLevel Optimal -Force
           if (!(Test-Path $zip)) { throw 'Archive missing' }
