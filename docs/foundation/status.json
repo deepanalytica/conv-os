@@ -75,6 +75,11 @@
       "id": "ADR-0001",
       "path": "docs/foundation/adr/ADR-0001-local-first.md",
       "status": "PROPOSED"
+    },
+    {
+      "id": "F-ASSURANCE",
+      "path": "docs/foundation/14-ASSURANCE-ENGINE.md",
+      "status": "PROPOSED"
     }
   ],
   "deliverables": [
@@ -127,6 +132,16 @@
       "title": "Real-channel conversion and payment evidence",
       "state": "NOT_STARTED",
       "evidence": [],
+      "owner": "codex+human"
+    },
+    {
+      "id": "P1-GATE-01",
+      "title": "Executable proposal policy gates and eight static anti-regression checks",
+      "state": "TESTED",
+      "reason": "CI verifies pure fail-closed decisions; NOT a runtime PRAXIOS integration or Windows validation",
+      "evidence": [
+        "https://github.com/deepanalytica/conv-os/actions/runs/40051172129"
+      ],
       "owner": "codex+human"
     }
   ],
