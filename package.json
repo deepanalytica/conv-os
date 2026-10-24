@@ -13,7 +13,7 @@
     "restore:local": "node --experimental-sqlite scripts/restore-local.mjs",
     "dev": "node --watch --experimental-sqlite src/server.js",
     "test": "node --experimental-sqlite --test tests/*.test.js",
-    "check": "node --check src/server.js && node --check src/domain.js && node --check src/crm.js && node --check src/commercial.js && node --check src/followups.js && node --check src/security.js && node --check src/backup-crypto.js && node --check public/login.js && node --check scripts/setup-local.mjs && node --check scripts/backup-local.mjs && node --check scripts/restore-local.mjs && node --check public/app.js && node --check public/crm-ui.js && node --check public/commercial-ui.js && npm run docs:check && npm run assurance:check && npm test",
+    "check": "node --check src/server.js && node --check src/domain.js && node --check src/crm.js && node --check src/commercial.js && node --check src/consent.js && node --check src/followups.js && node --check src/security.js && node --check src/backup-crypto.js && node --check public/login.js && node --check scripts/setup-local.mjs && node --check scripts/backup-local.mjs && node --check scripts/restore-local.mjs && node --check public/app.js && node --check public/crm-ui.js && node --check public/commercial-ui.js && node --check public/privacy-ui.js && npm run docs:check && npm run assurance:check && npm test",
     "docs:check": "node scripts/validate-foundation.mjs",
     "assurance:check": "node scripts/assurance-check.mjs"
   }
