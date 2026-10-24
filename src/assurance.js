@@ -34,7 +34,17 @@ export function assessStep(step,{knownRequirements=[]}={}){
   fail('G0','StepProposal must be an object');
   return {policy_version:POLICY_VERSION,decision:'DENY',may_execute:false,gates};
  }
- const hasUUIDs=UUID.test(step.mission_id||'')&&UUID.test(step.step_id||'')&&UUID.test(step.idempotency_key||'');
+ const allowedFields=new Set(['mission_id','step_id','revision','requirement_ids',
+  'dependencies','capability','risk','deadline','budget','policy_digest',
+  'idempotency_key','human_approval_required']);
+ if(Object.keys(step).some(field=>!allowedFields.has(field)))fail('G1','Unexpected proposal fields');
+ if(!Array.isArray(knownRequirements)||knownRequirements.length===0)
+  fail('G1','No trusted PRD requirement inventory was provided');
+ if(step.deadline!==null&&(typeof step.deadline!=='string'
+   ||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?Z$/.test(step.deadline)
+   ||!Number.isFinite(Date.parse(step.deadline))))
+  fail('G1','Invalid deadline; use UTC ISO 8601 or null');
+  const hasUUIDs=UUID.test(step.mission_id||'')&&UUID.test(step.step_id||'')&&UUID.test(step.idempotency_key||'');
  if(!hasUUIDs||step.mission_id===step.step_id)fail('G0','Invalid unique mission/step/idempotency IDs');
  else gates.push(gate('G0','ALLOW','Traceable proposal identifiers'));
  if(!Number.isSafeInteger(step.revision)||step.revision<1)fail('G1','Invalid revision');
@@ -43,7 +53,7 @@ export function assessStep(step,{knownRequirements=[]}={}){
   ||step.requirement_ids.some(r=>typeof r!=='string'||!REQUIREMENT.test(r)
    ||(knownRequirements.length>0&&!knownRequirements.includes(r))))
   fail('G1','Unknown, missing or duplicated requirement IDs');
- if(!Array.isArray(step.dependencies)||step.dependencies.some(dep=>typeof dep!=='string'||!UUID.test(dep)||dep===step.step_id))
+ if(!Array.isArray(step.dependencies)||new Set(step.dependencies).size!==step.dependencies.length||step.dependencies.some(dep=>typeof dep!=='string'||!UUID.test(dep)||dep===step.step_id))
   fail('G1','Invalid dependency IDs');
  if(!plainObject(step.budget)||!Number.isSafeInteger(step.budget.calls)
   ||step.budget.calls<1||step.budget.calls>POLICY.maxCallsPerStep
