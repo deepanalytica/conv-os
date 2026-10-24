@@ -24,6 +24,8 @@ jobs:
         run: |
           test -f public/index.html
           test -f public/app.js
+          test -f public/crm-ui.js
+          test -f public/crm-ui.css
           test -f public/styles.css
           test -f public/premium.css
           test -f public/landing/index.html
