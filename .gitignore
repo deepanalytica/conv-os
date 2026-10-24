@@ -11,3 +11,9 @@ coverage/
 .local/
 backups/
 *.convbak
+
+# Unpublished Meta gateway credentials and local Worker state
+edge/meta-gateway/wrangler.toml
+edge/meta-gateway/.dev.vars
+edge/meta-gateway/.wrangler/
+**/.env.local
