@@ -52,7 +52,9 @@ export function initCommercial(db){
   ['gift-pack','demo-wal','Pack regalos · demo',6999000],
   ['audit','demo-vaa','Diagnóstico comercial · demo',15000000],
   ['automation','demo-vaa','Automatización comercial · demo',35000000]
- ])stmt.run(id,tenant,label,price,now);
+ ]){
+  if(db.prepare('SELECT id FROM tenants WHERE id=?').get(tenant))stmt.run(id,tenant,label,price,now);
+ }
 }
 const listQuotes=`SELECT q.*,o.label AS offer_label,c.name AS contact_name,
  op.title AS opportunity_title
