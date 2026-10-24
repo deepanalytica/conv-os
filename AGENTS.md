@@ -1,7 +1,16 @@
 # AGENTS.md · Reglas de trabajo
 
 ## Primero
-Leer README, PRD, ARCHITECTURE y DESIGN_SYSTEM antes de cambiar código. Este repositorio es horizontal: **no** renombrarlo según un restaurante o negocio piloto.
+Leer `README.md`, `docs/foundation/00-INDEX.md`, `docs/foundation/status.json`, `docs/foundation/01-PRD.md`, `docs/foundation/02-SDD.md` y `docs/foundation/05-TDD.md` antes de cambiar código. Revisa `PRD.md`, `ARCHITECTURE.md` y `DESIGN_SYSTEM.md` como legado contextual. Este repositorio es horizontal: **no** renombrarlo según un restaurante o negocio piloto.
+
+### Autoridad y alcance de los agentes
+- Los documentos en `docs/foundation/` están `PROPOSED` hasta revisión humana: especificar no equivale a aprobar.
+- El LLM genera código y propuestas, no es frontera de seguridad ni fuente de verdad de resultados.
+- PRAXIOS coordina pasos; Meta-Harness verifica reglas, evidencia y gates. **No declarar integración runtime sin evidencia**.
+- Cada trabajo debe mapear tarea a FR/NFR, estados `docs/foundation/03-STATES.md`, contratos `04-CONTRACTS.md` y tests `05-TDD.md`.
+- Los efectos irreversibles, gastos, comunicaciones reales y cambios del número WhatsApp exigen autorización humana explícita.
+- Dejar relevo verificable con rama, commit, pruebas, bloqueos y próxima acción según `08-EVIDENCE-AND-HANDOFF.md`.
+- No introducir nuevas capas, migración tecnológica o reescrituras sin ADR con comparación de alternativas y prueba del beneficio. Este repositorio es horizontal: **no** renombrarlo según un restaurante o negocio piloto.
 
 ## Invariantes
 1. Pagos confirmados solo por integración validada; endpoint de simulación únicamente en sandbox.
@@ -14,7 +23,7 @@ Leer README, PRD, ARCHITECTURE y DESIGN_SYSTEM antes de cambiar código. Este re
 ## Rutina
 - Cambio pequeño con tests y documentación juntos.
 - Ejecutar `npm run check`.
-- No exponer el servidor local a internet con el token de demo.
+- No exponer el servidor local a internet. El token de demo anterior fue reemplazado por autenticación del propietario en la rama experimental.
 - GitHub Pages solo puede anunciarse como demo estática.
 - No declarar integraciones reales operativas antes de pruebas E2E con credenciales propias.
 
