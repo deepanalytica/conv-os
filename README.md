@@ -2,6 +2,12 @@
 
 **Sistema operativo empresarial construido alrededor de conversaciones.** Base horizontal para gastronomía, servicios, distribución y otros negocios que atienden por WhatsApp.
 
+## Fundamentos del desarrollo con PRAXIOS y Meta-Harness
+
+Toda nueva sesión de Codex/Claude u otro agente debe empezar por **[Índice de arquitectura y gobernanza](docs/foundation/00-INDEX.md)** y **[estado verificable](docs/foundation/status.json)**. Hay PRD, SDD, TDD, contratos, estados, seguridad, economía unitaria, diseño, plan de ejecución, protocolo de agentes y plantillas de relevo. Su estado documental es `PROPOSED` hasta aprobación humana; no representa conexión operativa con el runtime PRAXIOS.
+
+Instrucciones para clonar o actualizar en Windows: [bootstrap local](docs/foundation/12-BOOTSTRAP.md). No introducir datos personales hasta completar gates de privacidad y pruebas Windows.
+
 ## Versión local protegida · Windows
 
 La rama `feat/acquisition-os` implementa contraseña individual, sesiones privadas, protección CSRF, acceso exclusivamente por loopback, seguimientos comerciales y respaldos cifrados. La base SQLite activa aún necesita cifrado de disco mediante Windows BitLocker.
