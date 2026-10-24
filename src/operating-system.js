@@ -213,10 +213,10 @@ export function acquisitionAnalytics(db,tenant,{days=30,clock=new Date()}={}){
 }
 export async function handleOperatingSystem({db,req,res,path,url,tenant,json,limited,checkedJson}){
  if(req.method==='GET'&&path==='/api/os/ontology'){
-  return json(res,200,commercialKnowledge());
+  json(res,200,commercialKnowledge());return true;
  }
  if(req.method==='GET'&&path==='/api/os/analytics'){
-  return json(res,200,acquisitionAnalytics(db,tenant,{days:rangeDays(url.searchParams.get('days'))}));
+  json(res,200,acquisitionAnalytics(db,tenant,{days:rangeDays(url.searchParams.get('days'))}));return true;
  }
  if(req.method==='GET'&&path==='/api/os/recommendations'){
   const rows=db.prepare(`SELECT r.*,o.title AS opportunity_title,c.name AS contact_name
@@ -226,20 +226,20 @@ export async function handleOperatingSystem({db,req,res,path,url,tenant,json,lim
     WHERE r.tenant_id=?
     ORDER BY CASE WHEN r.status='pending_review' THEN 0 ELSE 1 END,
      CASE WHEN r.severity='critical' THEN 0 ELSE 1 END,r.first_detected_at DESC LIMIT 250`).all(tenant);
-  return json(res,200,{recommendations:rows,automation_enabled:false});
+  json(res,200,{recommendations:rows,automation_enabled:false});return true;
  }
  if(req.method==='POST'&&path==='/api/os/orchestrate'){
   const body=checkedJson(await limited(req,4096));
   if(!body||typeof body!=='object'||Array.isArray(body))throw fail('Solicitud inválida');
   const result=runLocalRules(db,tenant,body.idempotency_key);
-  return json(res,200,{run:result,external_actions:0,requires_human_review:true});
+  json(res,200,{run:result,external_actions:0,requires_human_review:true});return true;
  }
  const match=path.match(/^\/api\/os\/recommendations\/([a-f0-9-]{36})\/review$/);
  if(req.method==='POST'&&match){
   const body=checkedJson(await limited(req,4096));
   if(!body||typeof body!=='object'||Array.isArray(body))throw fail('Solicitud inválida');
   const record=reviewRecommendation(db,tenant,match[1],body.decision);
-  return json(res,200,{recommendation:record,external_actions:0});
+  json(res,200,{recommendation:record,external_actions:0});return true;
  }
  return false;
 }
