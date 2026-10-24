@@ -31,6 +31,8 @@ jobs:
           test -f public/login.js
           test -f src/security.js
           test -f src/followups.js
+          test -f src/commercial.js
+          test -f public/commercial-ui.js
           test -f scripts/backup-local.mjs
           test -f scripts/restore-local.mjs
           test -f scripts/secret-input.mjs
