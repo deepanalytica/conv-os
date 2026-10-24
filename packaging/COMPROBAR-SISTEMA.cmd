@@ -7,6 +7,6 @@ if errorlevel 1 (
   pause
   exit /b 1
 )
-".\node.exe" --experimental-sqlite --test ".\tests\*.test.js"
+".\node.exe" --experimental-sqlite --test
 pause
 endlocal
