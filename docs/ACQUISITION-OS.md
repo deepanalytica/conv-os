@@ -22,9 +22,9 @@ Abrir `http://127.0.0.1:4173`, seleccionar WAL o Visual Art AI y entrar a **Adqu
 
 En GitHub Pages los cambios de CRM son locales al navegador (localStorage), sin red, y desaparecen si se borran los datos del sitio. El backend local usa SQLite. No confundir ninguno con producción.
 
-## API local protegida (token DEMO, no apto para producción)
+## API local protegida (sesión local, todavía no apta para clientes reales)
 
-Todas estas rutas exigen `Authorization: Bearer <ADMIN_TOKEN>` y `x-tenant-id`.
+Todas estas rutas requieren una sesión local autenticada mediante cookie HttpOnly. Las operaciones de escritura también necesitan `x-csrf-token`, obtenido desde `/api/auth/session`; `x-tenant-id` identifica la empresa de trabajo del propietario. El token compartido antiguo ya no autoriza la API.
 
 | Ruta | Método | Función |
 | --- | --- | --- |
@@ -34,6 +34,8 @@ Todas estas rutas exigen `Authorization: Bearer <ADMIN_TOKEN>` y `x-tenant-id`.
 | `/api/crm/opportunities` | POST | Crea oportunidad en etapa new |
 | `/api/crm/opportunities/{id}/stage` | POST | Avanza etapa ({stage}) |
 | `/api/crm/overview` | GET | Conteos y valor estimado ganado |
+| `/api/crm/followups` | GET/POST | Listar y programar tareas manuales |
+| `/api/crm/followups/{id}/complete` | POST | Cerrar seguimiento sin enviar mensajes |
 
 `amount_cents` utiliza enteros en centavos. No representa dinero cobrado. La etapa `won` solo registra un estado comercial, **nunca verifica pagos**.
 
@@ -68,3 +70,7 @@ Todas estas rutas exigen `Authorization: Bearer <ADMIN_TOKEN>` y `x-tenant-id`.
 - **Analítica:** fuente, campaña, tasa de respuesta, conversión, márgenes y atribución verificable.
 
 Cada incremento debe acompañarse de pruebas; no representar funcionalidades pendientes como operativas.
+
+## Operación local y autonomía controlada
+
+Para iniciar en Windows, configurar la clave, crear respaldos cifrados y revisar los riesgos, seguir [LOCAL-WINDOWS.md](LOCAL-WINDOWS.md). Los seguimientos generan tareas y alertas visuales; no envían comunicaciones automáticas ni consumen cuentas Meta. El sistema es local, y cualquier conexión exterior será un incremento aparte con revisión de privacidad.
