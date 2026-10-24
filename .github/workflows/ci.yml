@@ -38,6 +38,9 @@ jobs:
           test -f public/integrations-ui.js
           test -f public/workspace-v1.css
           test -f src/integrations.js
+          test -f src/channel-events.js
+          test -f scripts/pull-meta-metadata.mjs
+          test -f edge/meta-gateway/migrations/0001_accounts.sql
           test -f edge/meta-gateway/src/index.js
           test -f scripts/backup-local.mjs
           test -f scripts/restore-local.mjs
