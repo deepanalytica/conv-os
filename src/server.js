@@ -85,7 +85,11 @@ export function createServer(){
   if(!['GET','HEAD','OPTIONS'].includes(req.method)&&!allowedOrigin(req)){
    return json(res,403,{error:'Origen no autorizado'});
   }
-  const url=new URL(req.url||'/',`http://${req.headers.host}`);
+  // Un request-target o Host malformado nunca debe terminar el proceso.
+  if(!String(req.url||'').startsWith('/'))return json(res,400,{error:'Ruta inválida'});
+  let url;
+  try{url=new URL(req.url||'/',`http://${req.headers.host}`)}
+  catch{return json(res,400,{error:'Dirección inválida'})}
   const path=url.pathname;
   try {
    if(path==='/api/auth/login'&&req.method==='POST'){
@@ -117,7 +121,8 @@ export function createServer(){
    }
    if(path==='/api/meta/webhook'&&req.method==='POST'){
     if(process.env.ENABLE_META_WEBHOOKS!=='true')return json(res,503,{error:'Integración Meta deshabilitada'});
-    if(!process.env.META_APP_SECRET||!process.env.META_TENANT_ID)return json(res,503,{error:'Meta no configurado'});
+    if(!process.env.META_APP_SECRET||!process.env.META_TENANT_ID||!process.env.META_PHONE_NUMBER_ID)
+     return json(res,503,{error:'Meta no configurado con identificador de número'});
     const raw=await limited(req,1024*1024);
     const expected='sha256='+createHmac('sha256',process.env.META_APP_SECRET).update(raw).digest('hex');
     if(!equal(expected,req.headers['x-hub-signature-256']))return json(res,401,{error:'Firma inválida'});
