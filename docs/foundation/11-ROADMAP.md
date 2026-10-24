@@ -17,6 +17,14 @@ Repositorio `deepanalytica/conv-os`; rama `feat/acquisition-os` contiene trabajo
 - Estado documental `PROPOSED` hasta aprobación humana; Gate G6 producción permanece `BLOCKED`.
 - Ver [Gates ejecutables](14-ASSURANCE-ENGINE.md).
 
+## Incremento Prism OS (implementación propuesta)
+
+- Ontología canónica, recomendaciones y reglas deterministas en SQLite; idempotencia y auditoría por empresa.
+- Analítica local del pipeline y tareas basada en datos registrados, con nulos explícitos para CAC, ROAS y cobros.
+- Centro de mando Aurora Glass responsive (claro/oscuro) y sección de orquestación bajo revisión del propietario.
+- Código y tests en `feat/prism-acquisition-os`. NO implica integración real con Meta, runtime PRAXIOS o autorización de producción.
+- Evidencia CI y navegador deben adjuntarse al PR tras terminar; probar también en Windows del propietario.
+
 ## P1 — contratos y confiabilidad de datos
 - P1-01: migraciones SQLite versionadas, auditoría por empresa y rechazo de cruce de datos.
 - P1-02: eventos idempotentes, transacciones, límites de uso, política de retención y borrado.
