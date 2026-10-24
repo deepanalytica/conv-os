@@ -26,6 +26,11 @@ jobs:
           test -f public/app.js
           test -f public/crm-ui.js
           test -f public/crm-ui.css
+          test -f public/login.html
+          test -f public/login.css
+          test -f public/login.js
+          test -f src/security.js
+          test -f scripts/setup-local.mjs
           test -f public/styles.css
           test -f public/premium.css
           test -f public/landing/index.html
