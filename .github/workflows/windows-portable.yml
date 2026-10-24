@@ -37,6 +37,8 @@ jobs:
           Copy-Item -Force -Path 'packaging/LEEME-PRIMERO.txt' -Destination $target
           $node=(Get-Command node).Source
           Copy-Item -Force -Path $node -Destination (Join-Path $target 'node.exe')
+          if (!(Test-Path (Join-Path $target 'public/commercial-ui.js'))) { throw 'Commercial UI missing' }
+          if (!(Test-Path (Join-Path $target 'src/commercial.js'))) { throw 'Commercial API missing' }
           if ((Test-Path (Join-Path $target '.local')) -or (Test-Path (Join-Path $target 'data'))) {
             throw 'Unexpected private data folder in package'
           }
