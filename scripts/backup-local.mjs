@@ -1,7 +1,8 @@
 import {DatabaseSync} from 'node:sqlite';
 import {mkdirSync,readFileSync,rmSync,writeFileSync,existsSync} from 'node:fs';
 import {resolve,join} from 'node:path';
-import {randomBytes,scryptSync,createCipheriv} from 'node:crypto';
+import {randomBytes} from 'node:crypto';
+import {encryptBackup} from '../src/backup-crypto.js';
 import {readSecret} from './secret-input.mjs';
 
 const dbPath=resolve(process.env.DB_PATH||'data/ops.sqlite');
@@ -17,13 +18,7 @@ try{
  const db=new DatabaseSync(dbPath);
  try{db.exec("VACUUM INTO '"+tmp.replaceAll("'","''")+"'")}finally{db.close()}
  const plain=readFileSync(tmp);
- const salt=randomBytes(32),iv=randomBytes(12);
- const key=scryptSync(pass,salt,32,{N:1<<15,r:8,p:1,maxmem:64*1024*1024});
- const cipher=createCipheriv('aes-256-gcm',key,iv);
- const header=Buffer.from('CONVOS1');
- cipher.setAAD(header);
- const encrypted=Buffer.concat([cipher.update(plain),cipher.final()]);
- const payload=Buffer.concat([header,salt,iv,cipher.getAuthTag(),encrypted]);
+ const payload=encryptBackup(plain,pass);
  writeFileSync(target,payload,{mode:0o600,flag:'wx'});
  console.log('Respaldo cifrado creado: '+target);
  console.log('Conserva el archivo en un almacenamiento externo protegido y la frase en un gestor de contraseñas.');
