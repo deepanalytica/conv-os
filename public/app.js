@@ -2,9 +2,11 @@ import {activateCrm} from './crm-ui.js';
 import {activateIntegrations} from './integrations-ui.js';
 import {activateInsights} from './insights-ui.js';
 import {activateOrchestration} from './orchestration-ui.js';
+import {ensureDemoFixtures,resetDemoFixtures} from './demo-fixtures.js';
 const $=s=>document.querySelector(s);
 const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const staticDemo=location.hostname.endsWith('.github.io')||location.protocol==='file:';
+const staticDemo=document.documentElement.dataset.publicDemo==='true'||location.hostname.endsWith('.github.io')||location.protocol==='file:';
+if(staticDemo)ensureDemoFixtures();
 const demoTenants=[
  {id:'demo-food',name:'Negocio gastronómico',segment:'food'},
  {id:'demo-service',name:'Servicios técnicos',segment:'service'},
@@ -155,7 +157,7 @@ function render(){
  </aside>
  <main class="main">
   <header class="topbar"><div class="crumb">Workspace &nbsp;/&nbsp; <strong>${escape(current.name)}</strong></div>
-   <div class="actions"><button class="theme-toggle" data-theme-toggle type="button" aria-label="Cambiar tema" aria-pressed="false">☼ <span>Modo claro</span></button><span class="badge orange">◉ SIN CANALES REALES</span><select class="select" id="tenant-select" aria-label="Empresa">${state.tenants.map(t=>`<option value="${escape(t.id)}" ${t.id===state.tenant?'selected':''}>${escape(t.name)}</option>`).join('')}</select></div>
+   <div class="actions">${staticDemo?'<button class="theme-toggle" type="button" id="demo-reset" title="Restablecer los ejemplos ficticios">↺ Reiniciar demo</button>':''}<button class="theme-toggle" data-theme-toggle type="button" aria-label="Cambiar tema" aria-pressed="false">☼ <span>Modo claro</span></button><span class="badge orange">◉ SIN CANALES REALES</span><select class="select" id="tenant-select" aria-label="Empresa">${state.tenants.map(t=>`<option value="${escape(t.id)}" ${t.id===state.tenant?'selected':''}>${escape(t.name)}</option>`).join('')}</select></div>
   </header>
   <div class="brand-context"><span class="brand-dot" aria-hidden="true"></span><span>Empresa: <strong>${escape(current.name)}</strong> · datos separados · ${staticDemo?'demostración pública':'sesión privada local'}</span></div>
   <section class="hero"><div><div class="eyebrow">CONTROL DE ADQUISICIÓN · LABORATORIO</div>
@@ -183,6 +185,7 @@ function render(){
  bind();
 }
 function bind(){
+ $('#demo-reset')?.addEventListener('click',()=>{resetDemoFixtures();state.tenant='demo-wal';state.view='overview';state.filter='all';notify('Demo restablecida con ejemplos ficticios');refresh()});
  $('#logout-local')?.addEventListener('click',async()=>{
   try{
    const response=await fetch('/api/auth/session',{credentials:'same-origin',cache:'no-store'});
