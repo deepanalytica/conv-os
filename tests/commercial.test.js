@@ -5,7 +5,7 @@ import {initCrm} from '../src/crm.js';
 import {initCommercial,commercialSummary,quoteValues,handleCommercial} from '../src/commercial.js';
 
 const db=new DatabaseSync(':memory:');
-db.exec("PRAGMA foreign_keys=ON; CREATE TABLE tenants (id TEXT PRIMARY KEY,name TEXT,segment TEXT); INSERT INTO tenants VALUES ('wal','WAL','retail'),('vaa','VAA','services');");
+db.exec("PRAGMA foreign_keys=ON; CREATE TABLE tenants (id TEXT PRIMARY KEY,name TEXT,segment TEXT); INSERT INTO tenants VALUES ('wal','WAL','retail'),('vaa','VAA','services'),('demo-wal','Demo WAL','retail'),('demo-vaa','Demo VAA','services');");
 initCrm(db);initCommercial(db);
 const one='f35b912b-63dd-469a-b30b-0e987f9ad451';
 const two='1fbc9324-ab63-4f32-a19e-5095f5b4f2fa';
