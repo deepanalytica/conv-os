@@ -84,5 +84,5 @@ export function requireAllowedReadOrCheck(step,context){
  return decision;
 }
 export function requirementsFromPRD(markdown){
- return [...new Set([...String(markdown).matchAll(/\| ((?:FR|NFR)-\d{2}) \|/g)].map(x=>x[1]))];
+ return [...new Set([...String(markdown).matchAll(/\b(?:FR|NFR)-\d{2}\b/g)].map(x=>x[0]))];
 }
