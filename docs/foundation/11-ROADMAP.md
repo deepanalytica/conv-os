@@ -12,6 +12,11 @@ Repositorio `deepanalytica/conv-os`; rama `feat/acquisition-os` contiene trabajo
 - P0-04: ejecutar revisión visual y corregir bugs de UI reales; guardar evidencia.
 **Gate:** G0–G5, y aprobación humana para comenzar siguiente etapa.
 
+## P0 assurance incremental — control contra desvíos de agentes
+- Implementados en rama `feat/assurance-gates`: evaluador de `StepProposal` y ocho verificaciones estáticas de integridad; pruebas negativas y CI. **No es integración runtime, autorización remota ni prueba Windows.**
+- Estado documental `PROPOSED` hasta aprobación humana; Gate G6 producción permanece `BLOCKED`.
+- Ver [Gates ejecutables](14-ASSURANCE-ENGINE.md).
+
 ## P1 — contratos y confiabilidad de datos
 - P1-01: migraciones SQLite versionadas, auditoría por empresa y rechazo de cruce de datos.
 - P1-02: eventos idempotentes, transacciones, límites de uso, política de retención y borrado.
