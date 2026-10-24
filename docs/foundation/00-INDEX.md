@@ -28,7 +28,8 @@ La CI prueba propiedades definidas, **no certifica seguridad integral, validez c
 12. [Roadmap y brechas](11-ROADMAP.md).
 13. [Arranque local](12-BOOTSTRAP.md).
 14. [ADR-0001](adr/ADR-0001-local-first.md).
-15. [Estado verificable](status.json) y [plantillas](templates/TASK.md).
+15. [Instrucción reutilizable para modelos](13-LLM-ENTRYPOINT.md).
+16. [Estado verificable](status.json) y [plantillas](templates/TASK.md).
 
 Documentos de legado: `PRD.md`, `ARCHITECTURE.md`, `DESIGN_SYSTEM.md`, `docs/ACQUISITION-OS.md` y `docs/LOCAL-WINDOWS.md`. Son evidencia histórica del MVP v0.2 y de la rama de trabajo; esta carpeta **propone** la especificación v0.3, no altera retrospectivamente su estado.
 
