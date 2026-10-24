@@ -23,6 +23,14 @@ Ninguna de estas piezas ejecuta servicios de terceros; son una **primera impleme
 
 Incluso si un LLM aporta `human_approved: true` en un campo inventado, no se concede autoridad para un efecto externo. Un sistema futuro necesitará aprobación autenticada externamente, un adaptador de herramientas permitido, tokens con alcance mínimo y registro de recibos.
 
+## Contratos legibles por máquina
+
+- [JSON Schema — StepProposal](schemas/step-proposal.schema.json).
+- [JSON Schema — GateDecision](schemas/gate-decision.schema.json).
+- [Propuesta ficticia para pruebas](templates/step-proposal.example.json).
+
+Los contratos validan estructura; el motor además verifica el inventario real de requisitos, el digest vigente y bloquea efectos no autorizados. Un schema válido no equivale a una decisión ALLOW.
+
 ## Comandos
 
 ```powershell
