@@ -1,3 +1,4 @@
+import {metaEventCounts} from './channel-events.js';
 // Connection readiness, not OAuth. No local credentials and no forged CONNECTED status.
 // Meta authorization belongs to a future verified HTTPS OAuth flow with owner consent.
 export const CHANNELS=Object.freeze([
@@ -26,9 +27,11 @@ export function connectionStatus(env={}){
   }))
  };
 }
-export async function handleIntegrations({req,res,path,json}){
+export async function handleIntegrations({db,tenant,req,res,path,json}){
  if(req.method==='GET'&&path==='/api/integrations/status'){
-  json(res,200,connectionStatus(process.env));return true;
+  const result=connectionStatus(process.env);
+  result.metadata_event_counts=metaEventCounts(db,tenant);
+  json(res,200,result);return true;
  }
  return false;
 }
