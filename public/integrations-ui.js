@@ -25,7 +25,7 @@ function statusLine(s){
 }
 function getDemo(){
  return {mode:'LABORATORY',server:'LOCAL_ONLY',outbound_enabled:false,inbound_enabled:false,
-  real_accounts_connected:0,
+  real_accounts_connected:0,metadata_event_counts:[],
   configured:{metaApp:false,gateway:false,appReview:false,coexistenceEligibility:'NOT_VERIFIED'},
   channels:providers.map(p=>({id:p.id,status:'NOT_CONNECTED',last_verified_at:null}))};
 }
@@ -71,7 +71,7 @@ export async function activateIntegrations({api,staticDemo,escape,notify,tenantN
    <div class="workspace-utility"><div>
     <div class="workspace-eyebrow">ESTADO DEL SISTEMA</div>
     <h2>${Number(status.real_accounts_connected||0)} cuentas conectadas · receptor local aislado</h2>
-    <p>Envíos automáticos deshabilitados · API de Meta sin autorizar en el equipo.</p>
+    <p>Metadatos locales importados: ${(status.metadata_event_counts||[]).reduce((n,row)=>n+Number(row.events||0),0)} · Envíos automáticos deshabilitados.</p>
    </div><span class="workspace-pill">MODO SEGURO · LABORATORIO</span></div>
    <div class="connect-grid">${cards}</div>
    <div class="connect-warning"><strong>WhatsApp actual:</strong> no desinstales WhatsApp Business, no elimines la cuenta y no migres tu número por el registro convencional. La posibilidad de coexistencia depende de los requisitos de Meta y de tu cuenta.</div>
