@@ -1,5 +1,7 @@
 import {activateCrm} from './crm-ui.js';
 import {activateIntegrations} from './integrations-ui.js';
+import {activateInsights} from './insights-ui.js';
+import {activateOrchestration} from './orchestration-ui.js';
 const $=s=>document.querySelector(s);
 const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const staticDemo=location.hostname.endsWith('.github.io')||location.protocol==='file:';
@@ -17,7 +19,7 @@ const demoCatalog={
  'demo-wal':[{id:'mug',name:'Tazón personalizado',price_cents:1999000},{id:'gift-pack',name:'Pack de regalo',price_cents:6999000}],
  'demo-vaa':[{id:'audit',name:'Diagnóstico de presencia digital',price_cents:15000000},{id:'automation',name:'Automatización comercial',price_cents:35000000}]
 };
-let state={tenant:'demo-wal',tenants:demoTenants,orders:[],products:[],events:[],view:'crm',filter:'all',modal:false,loading:true};
+let state={tenant:'demo-wal',tenants:demoTenants,orders:[],products:[],events:[],view:'overview',filter:'all',modal:false,loading:true};
 const labels={draft:'Borrador',awaiting_payment:'Pago pendiente',paid:'Pago simulado',in_progress:'En proceso',ready:'Listo',out_for_delivery:'En despacho',completed:'Finalizado',cancelled:'Cancelado'};
 const next={draft:'awaiting_payment',awaiting_payment:'paid',paid:'in_progress',in_progress:'ready',ready:'out_for_delivery',out_for_delivery:'completed'};
 const tone=s=>s==='completed'?'green':s==='awaiting_payment'?'orange':s==='paid'?'purple':s==='cancelled'?'red':'';
@@ -133,14 +135,16 @@ function render(){
  const sum=state.orders.filter(x=>x.verified_at).reduce((a,b)=>a+b.total_cents,0);
  const current=state.tenants.find(x=>x.id===state.tenant)||demoTenants[0];
  const visible=state.orders.filter(o=>state.filter==='all'||o.status===state.filter);
- $('#app').innerHTML=`<div class="layout" data-brand="${escape(state.tenant)}">
+ $('#app').innerHTML=`<div class="layout" data-brand="${escape(state.tenant)}" data-view="${escape(state.view)}">
  <aside class="side">
-   <div class="brand"><span class="symbol">◈</span><span>CONVERSATION <b>OPS</b><small>BUSINESS OPERATING SYSTEM</small></span></div>
+   <div class="brand"><span class="symbol">◈</span><span>ACQUISITION <b>OS</b><small>COMMERCE · ANALYTICS · OPERATIONS</small></span></div>
    <nav aria-label="Navegación principal">
      <div class="subheading">ESPACIO DE TRABAJO</div>
      <button class="navbtn ${state.view==='overview'?'active':''}" data-view="overview"><span class="navicon">▦</span> Centro de mando</button>
      <button class="navbtn ${state.view==='inbox'?'active':''}" data-view="inbox"><span class="navicon">◎</span> Conversaciones</button>
      <button class="navbtn ${state.view==='crm'?'active':''}" data-view="crm"><span class="navicon">◇</span> Adquisición CRM</button>
+     <button class="navbtn ${state.view==='analytics'?'active':''}" data-view="analytics"><span class="navicon">⌁</span> Inteligencia comercial</button>
+     <button class="navbtn ${state.view==='orchestration'?'active':''}" data-view="orchestration"><span class="navicon">✦</span> Orquestación</button>
      <button class="navbtn ${state.view==='orders'?'active':''}" data-view="orders"><span class="navicon">▤</span> Operaciones</button>
      <button class="navbtn ${state.view==='connections'?'active':''}" data-view="connections"><span class="navicon">⬡</span> Integraciones</button>
      <div class="subheading">PLATAFORMA</div>
@@ -155,10 +159,12 @@ function render(){
   </header>
   <div class="brand-context"><span class="brand-dot" aria-hidden="true"></span><span>Empresa: <strong>${escape(current.name)}</strong> · datos separados · ${staticDemo?'demostración pública':'sesión privada local'}</span></div>
   <section class="hero"><div><div class="eyebrow">CONTROL DE ADQUISICIÓN · LABORATORIO</div>
-   <h1>${state.view==='inbox'?'Bandeja de conversaciones':state.view==='orders'?'Gestión de operaciones':state.view==='crm'?'Adquisición y oportunidades':state.view==='connections'?'Integraciones y canales':state.view==='settings'?'Configuración del espacio':'Convierte mensajes en operaciones.'}</h1>
-   <p>${state.view==='inbox'?'Conversaciones ilustrativas vinculadas al estado real de cada operación de prueba.':state.view==='crm'?'Gestiona contactos, califica oportunidades y mide resultados comerciales por empresa.':state.view==='connections'?'Permisos, cuentas y webhooks por marca. Ninguna integración aparece conectada sin evidencia oficial.':state.view==='settings'?'Configuración independiente por empresa y catálogo.':'De cada conversación a una operación organizada, con trazabilidad y estados claros.'}</p>
+   <h1>${state.view==='inbox'?'Bandeja de conversaciones':state.view==='orders'?'Gestión de operaciones':state.view==='crm'?'Adquisición y oportunidades':state.view==='analytics'?'Inteligencia comercial':state.view==='orchestration'?'Gestión y orquestación':state.view==='connections'?'Integraciones y canales':state.view==='settings'?'Configuración del espacio':'Convierte mensajes en operaciones.'}</h1>
+   <p>${state.view==='inbox'?'Conversaciones ilustrativas vinculadas al estado real de cada operación de prueba.':state.view==='crm'?'Gestiona contactos, califica oportunidades y mide resultados comerciales por empresa.':state.view==='analytics'?'Gráficos calculados sobre los registros locales; datos faltantes quedan explícitos.':state.view==='orchestration'?'Reglas auditables, recomendaciones y revisión humana sin acciones externas.':state.view==='connections'?'Permisos, cuentas y webhooks por marca. Ninguna integración aparece conectada sin evidencia oficial.':state.view==='settings'?'Configuración independiente por empresa y catálogo.':'De cada conversación a una operación organizada, con trazabilidad y estados claros.'}</p>
    </div>${['overview','orders'].includes(state.view)?'<button class="btn primary" id="add-order">＋ Nueva operación</button>':''}</section>
-  ${state.view==='crm'?'<section id="crm-workspace" class="crm-workspace" aria-label="CRM de demostración"></section>':state.view==='inbox'?inboxDemo():state.view==='connections'?'<section id="integration-workspace" aria-label="Conexiones Meta"></section>':
+  ${state.view==='overview'||state.view==='analytics'?'<section id="insights-workspace" aria-label="Centro de inteligencia comercial"></section>':
+   state.view==='orchestration'?'<section id="orchestration-workspace" aria-label="Motor de orquestación"></section>':
+   state.view==='crm'?'<section id="crm-workspace" class="crm-workspace" aria-label="CRM de demostración"></section>':state.view==='inbox'?inboxDemo():state.view==='connections'?'<section id="integration-workspace" aria-label="Conexiones Meta"></section>':
    state.view==='settings'?`<section class="panel" style="padding:25px"><h2>${escape(current.name)}</h2><p style="color:var(--muted);font-size:13px">Segmento: ${escape(current.segment)} · ID: ${escape(current.id)}</p><p style="color:var(--muted);font-size:13px">Productos configurados: ${state.products.length}. La edición del catálogo y los permisos de producción están en la hoja de ruta.</p></section>`:
   `<div class="premium-hero"><div class="hero-left"><span class="hero-eyebrow">● ACQUISITION / OPERATIONS</span><h2>Cada oportunidad.<br>Una <em>decisión mejor.</em></h2><p>Contactos, seguimientos, presupuestos y operaciones en un mismo centro de mando. Resultados basados en evidencia, no en métricas inventadas.</p><div class="hero-buttons"><button class="btn primary" data-view="inbox">Explorar bandeja ↗</button><button class="btn ghost" data-view="orders">Ver flujo de pedidos →</button></div></div><div class="hero-right"><div class="hero-overline">OPERACIÓN COMERCIAL · DEMO</div><div class="hero-big">${pesos(sum)}</div><p>Cobros simulados registrados</p><div class="hero-divider"></div><div><span>Operaciones en seguimiento</span><b>${active.length}</b></div><div><span>Pendientes de cobro</span><b>${pending}</b></div><div><span>Empresa seleccionada</span><b>${escape(current.name)}</b></div><footer>CONVERSACIÓN → PEDIDO → PAGO → ENTREGA</footer></div></div><div class="stats">
    <div class="stat"><div class="k">OPERACIONES <span class="bubble">▤</span></div><div class="v">${state.orders.length}</div><div class="foot">Registradas en este espacio</div></div>
@@ -195,6 +201,8 @@ function bind(){
  document.querySelectorAll('[data-chat-order]').forEach(b=>b.addEventListener('click',()=>{state.chatOrder=b.dataset.chatOrder;render()}));
  document.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('click',()=>mutate(b.dataset.action,b.dataset.id,b.dataset.next)));
  if(state.view==='crm')activateCrm({tenant:state.tenant,staticDemo,api,notify,escape,pesos});
+ if(['overview','analytics'].includes(state.view))activateInsights({tenant:state.tenant,staticDemo,api,escape,pesos,notify,onNavigate:view=>{state.view=view;render()}});
+ if(state.view==='orchestration')activateOrchestration({tenant:state.tenant,staticDemo,api,escape,notify,onNavigate:view=>{state.view=view;render()}});
  if(state.view==='connections')activateIntegrations({api,staticDemo,notify,escape,tenantName:state.tenants.find(t=>t.id===state.tenant)?.name||state.tenant});
 }
 refresh();
