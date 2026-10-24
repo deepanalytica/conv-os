@@ -18,9 +18,9 @@ const demoSeeds={
 function demoData(){
  try{
   const previous=JSON.parse(localStorage.getItem('conv-os-crm-v1')||'null');
-  if(previous&&Array.isArray(previous.contacts)&&Array.isArray(previous.opportunities))return previous;
+  if(previous&&Array.isArray(previous.contacts)&&Array.isArray(previous.opportunities)){previous.followups??=[];return previous;}
  }catch{}
- const data={contacts:[],opportunities:[]};
+ const data={contacts:[],opportunities:[],followups:[]};
  for(const [tenant,items] of Object.entries(demoSeeds))for(const [name,channel,title,amount,stage] of items){
   const id=crypto.randomUUID(),now=new Date().toISOString();
   data.contacts.push({id,tenant_id:tenant,name,channel,created_at:now,consent_status:'unknown'});
@@ -39,16 +39,18 @@ export async function activateCrm({tenant,staticDemo,api,notify,escape,pesos}){
  async function load(){
   if(staticDemo){
    const d=demoData();
-   return {contacts:d.contacts.filter(x=>x.tenant_id===tenant),opportunities:d.opportunities.filter(x=>x.tenant_id===tenant)};
+   return {contacts:d.contacts.filter(x=>x.tenant_id===tenant),opportunities:d.opportunities.filter(x=>x.tenant_id===tenant),followups:d.followups.filter(x=>x.tenant_id===tenant)};
   }
-  const [c,o]=await Promise.all([api('/crm/contacts'),api('/crm/opportunities')]);
-  return {contacts:c.contacts,opportunities:o.opportunities};
+  const [c,o,f]=await Promise.all([api('/crm/contacts'),api('/crm/opportunities'),api('/crm/followups')]);
+  return {contacts:c.contacts,opportunities:o.opportunities,followups:f.followups};
  }
  function draw(){
   if(!node.isConnected||activeTenant!==tenant)return;
   const opportunities=data.opportunities;
   const won=opportunities.filter(x=>x.stage==='won'),open=opportunities.filter(x=>!['won','lost'].includes(x.stage));
   const money=won.reduce((a,x)=>a+x.amount_cents,0);
+  const openTasks=data.followups.filter(t=>t.status==='open');
+  const overdue=openTasks.filter(t=>Date.parse(t.due_at)<Date.now()).length;
   const cards=pipeline.map(([stage,label])=>{
    const list=opportunities.filter(x=>x.stage===stage);
    return `<div class="crm-lane"><div class="crm-lane-title"><span>${label}</span><b>${list.length}</b></div>
@@ -65,7 +67,7 @@ export async function activateCrm({tenant,staticDemo,api,notify,escape,pesos}){
    <div class="crm-metric"><small>Oportunidades abiertas</small><b>${open.length}</b></div>
    <div class="crm-metric"><small>Negocios ganados*</small><b>${won.length}</b></div>
    <div class="crm-metric"><small>Valor ganado*</small><b>${pesos(money)}</b></div></div>
-   <div class="crm-notice">* Valores declarados de demostración; una oportunidad ganada no acredita pago. No hay conexión a Meta ni a bancos.</div>
+   <div class="crm-notice">* Valores declarados de demostración; una oportunidad ganada no acredita pago. No hay conexión a Meta ni a bancos. Seguimientos pendientes: ${openTasks.length}; vencidos: ${overdue}.</div>
    <div class="crm-toolbar"><div><div class="crm-title">Embudo comercial</div><div class="crm-subtitle">Oportunidades aisladas para esta empresa</div></div><span class="crm-demo-pill">MODO LABORATORIO</span></div>
    <div class="crm-board">${cards}</div>
    <div class="crm-forms">
@@ -83,11 +85,32 @@ export async function activateCrm({tenant,staticDemo,api,notify,escape,pesos}){
      <label for="crm-amount">Valor estimado (CLP)</label>
      <input name="amount" id="crm-amount" type="number" min="0" max="1000000000" step="1" value="0" required>
      <button class="btn primary" type="submit">+ Crear oportunidad</button></form></section>
+    <section class="crm-form-panel"><h2>Programar seguimiento</h2>
+     <form id="crm-followup-form">
+      <label for="crm-followup-opp">Oportunidad</label>
+      <select name="opportunity_id" id="crm-followup-opp" required>
+       <option value="">Selecciona una oportunidad</option>
+       ${opportunities.filter(o=>!['won','lost'].includes(o.stage)).map(o=>`<option value="${escape(o.id)}">${escape(o.contact_name)} · ${escape(o.title)}</option>`).join('')}
+      </select>
+      <label for="crm-followup-title">Próxima acción</label><input required maxlength="160" name="title" id="crm-followup-title" placeholder="Ej.: enviar cotización revisada">
+      <label for="crm-followup-date">Fecha y hora</label><input type="datetime-local" name="due_at" id="crm-followup-date" required>
+      <button class="btn primary" type="submit">+ Guardar recordatorio</button>
+     </form>
+    </section>
+    <section class="crm-form-panel"><h2>Seguimientos pendientes</h2>
+     <div class="crm-followups">
+      ${data.followups.filter(t=>t.status==='open').map(t=>`<div class="crm-followup-row">
+       <div><strong>${escape(t.title)}</strong><small>${escape(t.contact_name||opportunities.find(o=>o.id===t.opportunity_id)?.contact_name||'Contacto')}
+       · ${escape(new Date(t.due_at).toLocaleString('es-CL'))}</small></div>
+       <button class="btn" type="button" data-complete="${escape(t.id)}">Completar</button>
+      </div>`).join('')||'<div class="crm-empty">No hay tareas abiertas</div>'}
+     </div>
+    </section>
    </div>`;
  }
  try{data=await load();draw()}catch(e){renderError(e);return}
  node.addEventListener('submit',async e=>{
-  const form=e.target;if(!['crm-contact-form','crm-opportunity-form'].includes(form.id))return;
+  const form=e.target;if(!['crm-contact-form','crm-opportunity-form','crm-followup-form'].includes(form.id))return;
   e.preventDefault();
   const button=form.querySelector('[type="submit"]');button.disabled=true;
   const body=Object.fromEntries(new FormData(form));
@@ -95,6 +118,17 @@ export async function activateCrm({tenant,staticDemo,api,notify,escape,pesos}){
    if(form.id==='crm-contact-form'){
     if(staticDemo){const d=demoData(),now=new Date().toISOString();d.contacts.push({id:crypto.randomUUID(),tenant_id:tenant,name:body.name.trim(),channel:body.channel,created_at:now,consent_status:'unknown'});saveDemo(d)}
     else await api('/crm/contacts','POST',{name:body.name,channel:body.channel});
+   }else if(form.id==='crm-followup-form'){
+    if(!body.opportunity_id)throw Error('Selecciona una oportunidad');
+    const date=new Date(body.due_at);
+    if(!Number.isFinite(date.getTime()))throw Error('Fecha inválida');
+    const due_at=date.toISOString();
+    if(staticDemo){
+     const d=demoData();
+     if(!d.opportunities.some(o=>o.id===body.opportunity_id&&o.tenant_id===tenant))throw Error('Oportunidad inválida');
+     d.followups.push({id:crypto.randomUUID(),tenant_id:tenant,opportunity_id:body.opportunity_id,title:String(body.title).trim(),due_at,status:'open',created_at:new Date().toISOString(),completed_at:null});
+     saveDemo(d);
+    }else await api('/crm/followups','POST',{opportunity_id:body.opportunity_id,title:body.title,due_at});
    }else{
     if(!body.contact_id)throw Error('Selecciona un contacto');
     const cents=Number(body.amount)*100;
@@ -108,6 +142,20 @@ export async function activateCrm({tenant,staticDemo,api,notify,escape,pesos}){
     }else await api('/crm/opportunities','POST',{contact_id:body.contact_id,title:body.title,amount_cents:cents,source:'manual'});
    }
    data=await load();draw();notify('Registro creado en el entorno de demostración');
+  }catch(error){notify(error.message);button.disabled=false}
+ });
+ node.addEventListener('click',async e=>{
+  const button=e.target.closest('[data-complete]');
+  if(!button)return;
+  button.disabled=true;
+  const id=button.dataset.complete;
+  try{
+   if(staticDemo){
+    const d=demoData(),task=d.followups.find(x=>x.id===id&&x.tenant_id===tenant);
+    if(!task||task.status!=='open')throw Error('Seguimiento no disponible');
+    task.status='completed';task.completed_at=new Date().toISOString();saveDemo(d);
+   }else await api('/crm/followups/'+encodeURIComponent(id)+'/complete','POST',{});
+   data=await load();draw();notify('Seguimiento completado');
   }catch(error){notify(error.message);button.disabled=false}
  });
  node.addEventListener('change',async e=>{
