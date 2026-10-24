@@ -1,0 +1,134 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-10-23",
+  "scope": "conv-os / Acquisition OS (documentary baseline, not runtime evidence)",
+  "document_status": "PROPOSED",
+  "authority": "human-approval-required",
+  "reference_branch": "feat/acquisition-os",
+  "foundations": [
+    {
+      "id": "F-PRD",
+      "path": "docs/foundation/01-PRD.md",
+      "status": "PROPOSED"
+    },
+    {
+      "id": "F-SDD",
+      "path": "docs/foundation/02-SDD.md",
+      "status": "PROPOSED"
+    },
+    {
+      "id": "F-STATES",
+      "path": "docs/foundation/03-STATES.md",
+      "status": "PROPOSED"
+    },
+    {
+      "id": "F-CONTRACTS",
+      "path": "docs/foundation/04-CONTRACTS.md",
+      "status": "PROPOSED"
+    },
+    {
+      "id": "F-TDD",
+      "path": "docs/foundation/05-TDD.md",
+      "status": "PROPOSED"
+    },
+    {
+      "id": "F-SEC",
+      "path": "docs/foundation/06-SECURITY.md",
+      "status": "PROPOSED"
+    },
+    {
+      "id": "F-PROTOCOL",
+      "path": "docs/foundation/07-AGENT-PROTOCOL.md",
+      "status": "PROPOSED"
+    },
+    {
+      "id": "F-EVIDENCE",
+      "path": "docs/foundation/08-EVIDENCE-AND-HANDOFF.md",
+      "status": "PROPOSED"
+    },
+    {
+      "id": "F-ECON",
+      "path": "docs/foundation/09-ECONOMICS.md",
+      "status": "PROPOSED"
+    },
+    {
+      "id": "F-UX",
+      "path": "docs/foundation/10-DESIGN.md",
+      "status": "PROPOSED"
+    },
+    {
+      "id": "F-ROADMAP",
+      "path": "docs/foundation/11-ROADMAP.md",
+      "status": "PROPOSED"
+    },
+    {
+      "id": "ADR-0001",
+      "path": "docs/foundation/adr/ADR-0001-local-first.md",
+      "status": "PROPOSED"
+    }
+  ],
+  "deliverables": [
+    {
+      "id": "P0-01",
+      "title": "Local clone or confirm existing checkout",
+      "state": "BLOCKED",
+      "reason": "Windows Secure MCP Tunnel client offline; local folder not verified",
+      "evidence": [],
+      "owner": "human+codex"
+    },
+    {
+      "id": "P0-02",
+      "title": "Windows E2E tests",
+      "state": "NOT_STARTED",
+      "evidence": [],
+      "owner": "codex"
+    },
+    {
+      "id": "P0-03",
+      "title": "Disk encryption and backup-restore validation",
+      "state": "NOT_STARTED",
+      "evidence": [],
+      "owner": "human+codex"
+    },
+    {
+      "id": "P1-01",
+      "title": "Data migrations, identity mapping and tenant constraints",
+      "state": "NOT_STARTED",
+      "evidence": [],
+      "owner": "codex"
+    },
+    {
+      "id": "P2-01",
+      "title": "Meta official development assets and scopes",
+      "state": "BLOCKED",
+      "reason": "Official user account authorizations not completed",
+      "evidence": [],
+      "owner": "human"
+    },
+    {
+      "id": "P2-02",
+      "title": "Signed gateway and local pull architecture",
+      "state": "NOT_STARTED",
+      "evidence": [],
+      "owner": "codex"
+    },
+    {
+      "id": "P3-01",
+      "title": "Real-channel conversion and payment evidence",
+      "state": "NOT_STARTED",
+      "evidence": [],
+      "owner": "codex+human"
+    }
+  ],
+  "release_gate": {
+    "state": "BLOCKED",
+    "reason": "Local Windows E2E, privacy review, OAuth/Meta and production security absent"
+  },
+  "glossary": {
+    "PROPOSED": "Document proposed, not accepted",
+    "IMPLEMENTED": "Code present; not necessarily tested on target",
+    "TESTED": "Specific test passed in declared environment",
+    "BLOCKED": "A condition prevents progress",
+    "RELEASED": "Human-authorized production deployment with evidence"
+  }
+}
