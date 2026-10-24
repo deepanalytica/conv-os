@@ -1,7 +1,7 @@
 name: Windows portable package
 on:
   push:
-    branches: [feat/windows-distribution-acquisition, feat/ui-meta-connectors]
+    branches: [feat/windows-distribution-acquisition, feat/ui-meta-connectors, feat/prism-acquisition-os]
   workflow_dispatch:
 permissions:
   contents: read
@@ -44,6 +44,8 @@ jobs:
           if (!(Test-Path (Join-Path $target 'public/integrations-ui.js'))) { throw 'Meta connections UI missing' }
           if (!(Test-Path (Join-Path $target 'edge/meta-gateway/src/index.js'))) { throw 'Meta gateway source missing' }
           if (!(Test-Path (Join-Path $target 'src/channel-events.js'))) { throw 'Metadata importer missing' }
+          if (!(Test-Path (Join-Path $target 'src/operating-system.js'))) { throw 'OS engine missing' }
+          if (!(Test-Path (Join-Path $target 'public/prism-os.css'))) { throw 'Aurora Glass stylesheet missing' }
           if (!(Test-Path (Join-Path $target 'scripts/pull-meta-metadata.mjs'))) { throw 'Safe pull adapter missing' }
           if ((Test-Path (Join-Path $target '.local')) -or (Test-Path (Join-Path $target 'data'))) {
             throw 'Unexpected private data folder in package'
