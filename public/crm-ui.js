@@ -38,6 +38,7 @@ export async function activateCrm({tenant,staticDemo,api,notify,escape,pesos}){
  activeTenant=tenant;
  const renderError=error=>{if(node.isConnected)node.innerHTML='<div class="crm-error">'+escape(error.message||String(error))+'</div>'};
  let data;
+ let activeTab='pipeline';
  async function load(){
   if(staticDemo){
    const d=demoData();
@@ -70,6 +71,10 @@ export async function activateCrm({tenant,staticDemo,api,notify,escape,pesos}){
    <div class="crm-metric"><small>Negocios ganados*</small><b>${won.length}</b></div>
    <div class="crm-metric"><small>Valor ganado*</small><b>${pesos(money)}</b></div></div>
    <div class="crm-notice">* Valores declarados de demostración; una oportunidad ganada no acredita pago. No hay conexión a Meta ni a bancos. Seguimientos pendientes: ${openTasks.length}; vencidos: ${overdue}.</div>
+   <nav class="crm-section-nav" role="tablist" aria-label="Áreas comerciales">
+    ${[['pipeline','Oportunidades'],['followups','Seguimientos'],['quotes','Cotizaciones'],['privacy','Privacidad']].map(([id,label])=>`<button type="button" role="tab" data-crm-tab="${id}" aria-selected="${activeTab===id}">${label}</button>`).join('')}
+   </nav>
+   <div class="crm-tab-panel" data-crm-section="pipeline" ${activeTab==='pipeline'?'':'hidden'}>
    <div class="crm-toolbar"><div><div class="crm-title">Embudo comercial</div><div class="crm-subtitle">Oportunidades aisladas para esta empresa</div></div><span class="crm-demo-pill">MODO LABORATORIO</span></div>
    <div class="crm-board">${cards}</div>
    <div class="crm-forms">
@@ -87,6 +92,10 @@ export async function activateCrm({tenant,staticDemo,api,notify,escape,pesos}){
      <label for="crm-amount">Valor estimado (CLP)</label>
      <input name="amount" id="crm-amount" type="number" min="0" max="1000000000" step="1" value="0" required>
      <button class="btn primary" type="submit">+ Crear oportunidad</button></form></section>
+   </div></div>
+   <div class="crm-tab-panel" data-crm-section="followups" ${activeTab==='followups'?'':'hidden'}>
+    <div class="crm-toolbar"><div><div class="crm-title">Seguimientos y próximas acciones</div><div class="crm-subtitle">Crea tareas por oportunidad y evita olvidar clientes.</div></div></div>
+    <div class="crm-forms">
     <section class="crm-form-panel"><h2>Programar seguimiento</h2>
      <form id="crm-followup-form">
       <label for="crm-followup-opp">Oportunidad</label>
@@ -108,12 +117,23 @@ export async function activateCrm({tenant,staticDemo,api,notify,escape,pesos}){
       </div>`).join('')||'<div class="crm-empty">No hay tareas abiertas</div>'}
      </div>
     </section>
-   </div><section id="commercial-workspace" aria-label="Cotizaciones comerciales" class="crm-workspace"></section><section id="consent-workspace" aria-label="Privacidad y preferencias" class="crm-workspace"></section>`;
+   </div></div>
+   <section id="commercial-workspace" data-crm-section="quotes" aria-label="Cotizaciones comerciales" class="crm-workspace crm-tab-panel" ${activeTab==='quotes'?'':'hidden'}></section>
+   <section id="consent-workspace" data-crm-section="privacy" aria-label="Privacidad y preferencias" class="crm-workspace crm-tab-panel" ${activeTab==='privacy'?'':'hidden'}></section>`;
   activateCommercial({tenant,staticDemo,api,notify,escape,pesos,opportunities:data.opportunities});
   activateConsent({tenant,staticDemo,api,notify,escape,contacts:data.contacts});
  }
  try{data=await load();draw()}catch(e){renderError(e);return}
- node.addEventListener('submit',async e=>{
+ node.addEventListener('click',e=>{
+  const button=e.target.closest('[data-crm-tab]');
+  if(!button)return;
+  const selected=button.dataset.crmTab;
+  if(!['pipeline','followups','quotes','privacy'].includes(selected))return;
+  activeTab=selected;
+  node.querySelectorAll('[data-crm-section]').forEach(panel=>{panel.hidden=panel.dataset.crmSection!==selected});
+  node.querySelectorAll('[data-crm-tab]').forEach(tab=>tab.setAttribute('aria-selected',String(tab.dataset.crmTab===selected)));
+ });
+  node.addEventListener('submit',async e=>{
   const form=e.target;if(!['crm-contact-form','crm-opportunity-form','crm-followup-form'].includes(form.id))return;
   e.preventDefault();
   const button=form.querySelector('[type="submit"]');button.disabled=true;
