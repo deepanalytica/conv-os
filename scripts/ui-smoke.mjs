@@ -40,7 +40,12 @@ try{
  await page.locator('.brand-context').getByText(/Visual Art AI/).waitFor();
  await page.screenshot({path:'ui-artifacts/03-prism-vaa.png',fullPage:true});
  await page.locator('button[data-view="crm"]').click();
- await page.locator('#crm-workspace .crm-title').first().waitFor();
+ await page.waitForTimeout(600);
+ console.log('CRM diagnostic',{workspace:await page.locator('#crm-workspace').count(),
+  view:await page.locator('.layout').getAttribute('data-view'),
+  snippet:(await page.locator('#crm-workspace').allTextContents()).join(' ').slice(0,300),
+  errors});
+ await page.locator('#crm-workspace .crm-title').first().waitFor({timeout:7000});
  await page.locator('[data-crm-tab="quotes"]').click();
  await page.locator('#commercial-workspace .crm-title').waitFor();
  assert.equal(await page.locator('[data-crm-tab="quotes"]').getAttribute('aria-selected'),'true');
