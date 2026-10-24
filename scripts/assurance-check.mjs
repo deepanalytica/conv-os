@@ -1,5 +1,5 @@
 import {readFileSync} from 'node:fs';
-import {resolve} from 'node:path';
+import {resolve,relative,isAbsolute,sep} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {POLICY_DIGEST,assessStep,requirementsFromPRD} from '../src/assurance.js';
 
@@ -42,7 +42,8 @@ export function main(argv=process.argv.slice(2)){
  let step=null;
  if(argv.length>0){
   const file=resolve(process.cwd(),argv[0]);
-  if(!file.startsWith(root+'/')&&file!==root)throw Error('Step file must be inside the repository');
+  const rel=relative(root,file);
+  if(rel==='..'||rel.startsWith('..'+sep)||isAbsolute(rel))throw Error('Step file must be inside the repository');
   step=JSON.parse(readFileSync(file,'utf8'));
  }else step=examplePlan();
  const assessment=assessStep(step,{knownRequirements:requirementsFromPRD(prd)});
