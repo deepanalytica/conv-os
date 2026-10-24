@@ -5,6 +5,7 @@ import { resolve, dirname, join, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomUUID, createHmac, timingSafeEqual } from 'node:crypto';
 import { assertTransition, totalInCents, deliveryFee } from './domain.js';
+import {initCrm,seedCrmDemo,handleCrm} from './crm.js';
 
 const root=resolve(fileURLToPath(new URL('../',import.meta.url)));
 const staticDir=join(root,'public');
@@ -34,6 +35,21 @@ if(db.prepare('SELECT COUNT(*) AS n FROM tenants').get().n===0){
  ['p1','demo-distribution','Caja de insumos',1299000],['p2','demo-distribution','Paquete mayorista',4999000]
  ])item.run(...p);
 }
+// Los negocios reales del usuario se incorporan como espacios de DEMOSTRACIÓN.
+// No quedan habilitados para operar con clientes hasta instalar identidad y RBAC.
+for(const [id,name,segment] of [
+ ['demo-wal','WAL · Regalos personalizados','retail'],
+ ['demo-vaa','Visual Art AI','services']
+])db.prepare('INSERT OR IGNORE INTO tenants VALUES (?,?,?)').run(id,name,segment);
+for(const [tenant,id,name,price] of [
+ ['demo-wal','mug','Tazón personalizado',1999000],
+ ['demo-wal','gift-pack','Pack de regalo',6999000],
+ ['demo-vaa','audit','Diagnóstico de presencia digital',15000000],
+ ['demo-vaa','automation','Automatización comercial',35000000]
+])db.prepare('INSERT OR IGNORE INTO products(id,tenant_id,name,price_cents,available) VALUES (?,?,?,?,1)').run(id,tenant,name,price);
+initCrm(db);
+if(demo)seedCrmDemo(db);
+
 function tenantRequired(req){
  const id=String(req.headers['x-tenant-id']||'');
  if(!db.prepare('SELECT id FROM tenants WHERE id=?').get(id))throw Object.assign(Error('Empresa inválida'),{status:400});
@@ -84,6 +100,7 @@ export function createServer(){
     if(!apiToken||!equal(req.headers.authorization,`Bearer ${apiToken}`))return json(res,401,{error:'Autenticación requerida'});
     if(path==='/api/tenants'&&req.method==='GET')return json(res,200,{tenants:db.prepare('SELECT * FROM tenants').all()});
     const tenant=tenantRequired(req);
+    if(await handleCrm({db,req,res,path,tenant,json,limited,checkedJson}))return;
     if(path==='/api/overview'&&req.method==='GET'){
      const count=db.prepare("SELECT status,COUNT(*) n FROM orders WHERE tenant_id=? GROUP BY status").all(tenant);
      const sales=db.prepare("SELECT COALESCE(SUM(total_cents),0) v FROM orders WHERE tenant_id=? AND verified_at IS NOT NULL").get(tenant);
@@ -122,7 +139,8 @@ export function createServer(){
    }
    if(!['GET','HEAD'].includes(req.method))return json(res,405,{error:'Método no permitido'});
    const file=path==='/'?'index.html':path.slice(1);
-   if(!['index.html','app.js','styles.css','favicon.svg'].includes(file))return json(res,404,{error:'Archivo no encontrado'});
+   const allowed=/^(?:index\.html|app\.js|crm-ui\.js|crm-ui\.css|styles\.css|premium\.css|theme\.css|theme\.js|favicon\.svg|landing\/(?:index\.html|landing\.css|landing\.js)|assets\/[a-z0-9_-]+\.svg)$/;
+   if(!allowed.test(file))return json(res,404,{error:'Archivo no encontrado'});
    const bytes=readFileSync(join(staticDir,file));
    res.writeHead(200,{'content-type':types[extname(file)]||'application/octet-stream','cache-control':'no-cache'});
    return res.end(req.method==='HEAD'?undefined:bytes);
