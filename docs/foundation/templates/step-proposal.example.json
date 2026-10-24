@@ -1,0 +1,19 @@
+{
+  "mission_id": "96b1988f-1271-4b73-9efc-a2ec3f9a0f32",
+  "step_id": "5869494c-a7a3-4983-ae26-273ea2cb7008",
+  "idempotency_key": "d6702df6-5dde-4680-bb47-90defb4b95cb",
+  "revision": 1,
+  "requirement_ids": [
+    "NFR-02"
+  ],
+  "dependencies": [],
+  "capability": "local.check",
+  "risk": "low",
+  "human_approval_required": false,
+  "deadline": null,
+  "budget": {
+    "calls": 2,
+    "cost_usd_max": null
+  },
+  "policy_digest": "7a09a173a864193c39499665369220ae5dc6eca6f21fecf366523bb5c6283a17"
+}
