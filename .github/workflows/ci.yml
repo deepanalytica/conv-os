@@ -3,7 +3,7 @@ on:
   push:
     branches: [main, docs/praxios-meta-harness-foundation, feat/acquisition-os]
   pull_request:
-    branches: [main]
+    branches: [main, feat/acquisition-os, docs/praxios-meta-harness-foundation]
 permissions:
   contents: read
 jobs:
