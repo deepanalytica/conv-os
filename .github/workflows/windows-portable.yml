@@ -43,6 +43,8 @@ jobs:
           if (!(Test-Path (Join-Path $target 'public/privacy-ui.js'))) { throw 'Privacy UI missing' }
           if (!(Test-Path (Join-Path $target 'public/integrations-ui.js'))) { throw 'Meta connections UI missing' }
           if (!(Test-Path (Join-Path $target 'edge/meta-gateway/src/index.js'))) { throw 'Meta gateway source missing' }
+          if (!(Test-Path (Join-Path $target 'src/channel-events.js'))) { throw 'Metadata importer missing' }
+          if (!(Test-Path (Join-Path $target 'scripts/pull-meta-metadata.mjs'))) { throw 'Safe pull adapter missing' }
           if ((Test-Path (Join-Path $target '.local')) -or (Test-Path (Join-Path $target 'data'))) {
             throw 'Unexpected private data folder in package'
           }
