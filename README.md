@@ -2,6 +2,19 @@
 
 **Sistema operativo empresarial construido alrededor de conversaciones.** Base horizontal para gastronomía, servicios, distribución y otros negocios que atienden por WhatsApp.
 
+## Versión local protegida · Windows
+
+La rama `feat/acquisition-os` implementa contraseña individual, sesiones privadas, protección CSRF, acceso exclusivamente por loopback, seguimientos comerciales y respaldos cifrados. La base SQLite activa aún necesita cifrado de disco mediante Windows BitLocker.
+
+```powershell
+git switch feat/acquisition-os
+npm run check
+npm run setup:local
+npm start
+```
+
+Abre `http://127.0.0.1:4173` en la misma computadora. No publiques el puerto ni conectes datos reales hasta completar la seguridad, privacidad y autorización de Meta. Guía completa: [LOCAL-WINDOWS.md](docs/LOCAL-WINDOWS.md).
+
 ## Desarrollo de Acquisition OS (rama feat/acquisition-os)
 
 Se agregó una primera capa de **CRM comercial multiempresa**, reutilizando el backend, las pruebas y la interfaz existente: WAL (regalos personalizados) y Visual Art AI (servicios digitales) comparten panel con espacios independientes. Incluye contactos, oportunidades, pipeline, métricas estimadas y alta manual de registros.
@@ -41,7 +54,7 @@ npm run check
 npm start
 ```
 
-Abrir `http://127.0.0.1:4173`. La base SQLite se crea en `data/ops.sqlite`. El token de prueba es solo local. Para modificar la API fuera de localhost se requiere una implementación segura de identidad y permisos, que todavía no existe.
+Abrir `http://127.0.0.1:4173`. La base SQLite se crea en `data/ops.sqlite`. En la rama de desarrollo el acceso utiliza sesiones locales del propietario. No se permite exponer la API fuera de localhost.
 
 ## GitHub Pages
 **Demo visual:** [Conversation Ops — GH Pages](https://deepanalytica.github.io/conv-os/) (solo cuando GitHub Pages esté habilitado y el workflow termine correctamente).
