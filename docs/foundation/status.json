@@ -62,6 +62,16 @@
       "status": "PROPOSED"
     },
     {
+      "id": "F-BOOTSTRAP",
+      "path": "docs/foundation/12-BOOTSTRAP.md",
+      "status": "PROPOSED"
+    },
+    {
+      "id": "F-LLM-ENTRY",
+      "path": "docs/foundation/13-LLM-ENTRYPOINT.md",
+      "status": "PROPOSED"
+    },
+    {
       "id": "ADR-0001",
       "path": "docs/foundation/adr/ADR-0001-local-first.md",
       "status": "PROPOSED"
