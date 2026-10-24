@@ -33,6 +33,8 @@ jobs:
           test -f src/followups.js
           test -f src/commercial.js
           test -f public/commercial-ui.js
+          test -f src/consent.js
+          test -f public/privacy-ui.js
           test -f scripts/backup-local.mjs
           test -f scripts/restore-local.mjs
           test -f scripts/secret-input.mjs
