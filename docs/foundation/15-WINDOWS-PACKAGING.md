@@ -15,7 +15,7 @@ La compilación se descarga entrando al workflow **Windows portable package** en
 2. Activar cifrado del dispositivo/BitLocker, Windows Defender, usuario individual y bloqueo automático.
 3. Abrir `INICIO-CONV-OS.cmd` desde la carpeta extraída, crear contraseña del propietario y abrir http://127.0.0.1:4173.
 4. Usar únicamente los datos ficticios de laboratorio. Cambiar empresa WAL / Visual Art AI desde el selector.
-5. Crear contacto → oportunidad → seguimiento → presupuesto → registrar costos directos. **`draft` y `won` no son pagos.**
+5. Crear contacto → oportunidad → seguimiento → presupuesto → registrar costos directos → documentar preferencias sin habilitar envíos. **`draft` y `won` no son pagos.**
 6. Crear respaldo con `RESPALDO-CIFRADO.cmd`, guardar la frase de cifrado por separado y probar recuperación antes de actualizar versiones.
 7. Al reemplazar archivos de una versión futura, conservar datos y credenciales locales, **no sobrescribir la carpeta `data/` ni `.local/`**. Respaldar antes de migrar.
 
@@ -61,3 +61,6 @@ No hay receptor HTTPS de Meta publicado. Nunca conectar el número WhatsApp Busi
 ## Handoff a Codex / PRAXIOS
 
 Mantener incremental sobre esta rama, sin cambiar `main`. Cada entrega debe incluir ticket/FR, prueba negativa, artefacto firmado por CI (checksum SHA-256 del ZIP, no firma Authenticode), bloqueos y próximo paso. No declarar «rentable» sin costos reales, conversión comprobada y conciliación.
+
+## Consentimiento en laboratorio
+El nuevo libro de preferencias guarda declaraciones manuales por contacto y empresa. Un permiso marcado por el operador permanece `UNVERIFIED_CLAIM`; no se convierte en consentimiento oficial y el outbound sigue bloqueado. Las exclusiones `OPTED_OUT` permanecen en el historial. No hay OAuth ni autorización para campañas.
