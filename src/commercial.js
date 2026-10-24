@@ -24,7 +24,8 @@ export function quoteValues(offer,qty){
   projected_contribution_cents:direct===null?null:subtotal-direct};
 }
 export function initCommercial(db){
- db.exec(`CREATE TABLE IF NOT EXISTS commercial_offers (
+ db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS commercial_opportunity_tenant_unique ON crm_opportunities(id,tenant_id);
+ CREATE TABLE IF NOT EXISTS commercial_offers (
  id TEXT NOT NULL,tenant_id TEXT NOT NULL REFERENCES tenants(id),
  label TEXT NOT NULL,price_cents INTEGER NOT NULL CHECK(price_cents >= 0),
  direct_cost_cents INTEGER CHECK(direct_cost_cents >= 0),
