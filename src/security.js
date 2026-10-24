@@ -65,10 +65,10 @@ export function currentSession(req){
  return record;
 }
 export function makeSessionCookie(token){
- return COOKIE+'='+token+'; HttpOnly; SameSite=Strict; Path=/api; Max-Age=28800';
+ return COOKIE+'='+token+'; HttpOnly; SameSite=Strict; Path=/; Max-Age=28800';
 }
 export function clearSessionCookie(){
- return COOKIE+'=; HttpOnly; SameSite=Strict; Path=/api; Max-Age=0';
+ return COOKIE+'=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0';
 }
 export function startSession(password,hash){
  const now=Date.now();
