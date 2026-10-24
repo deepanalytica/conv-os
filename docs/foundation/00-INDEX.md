@@ -30,7 +30,8 @@ La CI prueba propiedades definidas, **no certifica seguridad integral, validez c
 14. [ADR-0001](adr/ADR-0001-local-first.md).
 15. [Instrucción reutilizable para modelos](13-LLM-ENTRYPOINT.md).
 16. [Gates ejecutables Meta-Harness](14-ASSURANCE-ENGINE.md).
-17. [Estado verificable](status.json) y [plantillas](templates/TASK.md).
+17. [Paquete Windows portable y límites comerciales](15-WINDOWS-PACKAGING.md).
+18. [Estado verificable](status.json) y [plantillas](templates/TASK.md).
 
 Documentos de legado: `PRD.md`, `ARCHITECTURE.md`, `DESIGN_SYSTEM.md`, `docs/ACQUISITION-OS.md` y `docs/LOCAL-WINDOWS.md`. Son evidencia histórica del MVP v0.2 y de la rama de trabajo; esta carpeta **propone** la especificación v0.3, no altera retrospectivamente su estado.
 
