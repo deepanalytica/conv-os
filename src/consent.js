@@ -26,9 +26,9 @@ export function consentSummary(receipts){
  const result={marketing_permission:'UNKNOWN',service_permission:'UNKNOWN',
   outbound_automation_allowed:false,reason:'No hay OAuth, evidencia verificable ni política de canal aprobada'};
  for(const purpose of PURPOSES){
-  const found=[...receipts].reverse().find(r=>r.purpose===purpose);
-  if(found?.decision==='opted_out')result[purpose+'_permission']='OPTED_OUT';
-  else if(found?.decision==='claimed_opt_in')result[purpose+'_permission']='UNVERIFIED_CLAIM';
+  const relevant=receipts.filter(r=>r.purpose===purpose);
+  if(relevant.some(r=>r.decision==='opted_out'))result[purpose+'_permission']='OPTED_OUT';
+  else if(relevant.some(r=>r.decision==='claimed_opt_in'))result[purpose+'_permission']='UNVERIFIED_CLAIM';
  }
  return result;
 }
