@@ -189,3 +189,20 @@ html[data-theme="light"] .stat .v{color:#243749}
  .crm-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media(prefers-reduced-motion:reduce){.navbtn,.btn,.connect-card{transition:none!important}}
+
+/* Progressive-disclosure CRM: one operational job at a time. */
+.crm-section-nav{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:18px 0 20px;
+ padding:6px;background:#121e29;border:1px solid #2b3f4c;border-radius:12px;width:fit-content;max-width:100%}
+.crm-section-nav button{display:flex;justify-content:center;align-items:center;min-height:39px;
+ border:1px solid transparent;background:transparent;border-radius:9px;padding:10px 16px;
+ font:700 11px var(--ux-font);color:#93a6b8;cursor:pointer;white-space:nowrap}
+.crm-section-nav button[aria-selected="true"]{background:#26403f;border-color:#3d6965;color:#d9fff2;box-shadow:0 3px 11px #0002}
+.crm-section-nav button:hover:not([aria-selected="true"]){color:#d9ecf4;background:#1d2e3d}
+.crm-section-nav button:focus-visible{outline:2px solid #a7e6ce;outline-offset:2px}
+.crm-tab-panel[hidden]{display:none!important}
+html[data-theme="light"] .crm-section-nav{background:#edf2f6;border-color:#d6e0e9}
+html[data-theme="light"] .crm-section-nav button{color:#65798a}
+html[data-theme="light"] .crm-section-nav button[aria-selected="true"]{background:#fff;border-color:#c6dad9;color:#266761;box-shadow:0 3px 14px #17374713}
+html[data-theme="light"] .crm-section-nav button:hover:not([aria-selected="true"]){background:#fff;color:#244456}
+@media(max-width:690px){.crm-section-nav{width:100%;gap:4px;padding:4px;flex-wrap:nowrap;overflow-x:auto}
+ .crm-section-nav button{font-size:10px;min-width:max-content;padding:9px 11px;flex:1}}
