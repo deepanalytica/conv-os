@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
   "generated_at": "2026-10-23",
-  "scope": "conv-os / Acquisition OS (documentary baseline, not runtime evidence)",
+  "scope": "conv-os / Acquisition OS (local-first commercial engine, proposed not released)",
   "document_status": "PROPOSED",
   "authority": "human-approval-required",
-  "reference_branch": "feat/acquisition-os",
+  "reference_branch": "feat/prism-acquisition-os",
   "foundations": [
     {
       "id": "F-PRD",
@@ -89,6 +89,11 @@
     {
       "id": "F-META-UX",
       "path": "docs/foundation/16-META-UX-CONNECTIVITY.md",
+      "status": "PROPOSED"
+    },
+    {
+      "id": "F-PRISM-OS",
+      "path": "docs/foundation/17-PRISM-OPERATING-SYSTEM.md",
       "status": "PROPOSED"
     }
   ],
@@ -176,6 +181,30 @@
       "title": "Professional multi-brand UI and truthful connection readiness",
       "state": "CODE_COMPLETE",
       "reason": "Responsive CSS and local status route implemented; no browser E2E run on owner PC",
+      "evidence": [],
+      "owner": "codex+human"
+    },
+    {
+      "id": "P1-ONT-OS",
+      "title": "Canonical acquisition ontology and deterministic rule runner",
+      "state": "CODE_COMPLETE",
+      "reason": "Tenant-scoped state, audit, idempotency and recommendations implemented; external PRAXIOS runtime not connected",
+      "evidence": [],
+      "owner": "codex+human"
+    },
+    {
+      "id": "P1-ANALYTICS",
+      "title": "Local analytics with verified data provenance and explicit missing metrics",
+      "state": "CODE_COMPLETE",
+      "reason": "SQLite reports and unit tests; payments, CAC and ROAS are unintegrated",
+      "evidence": [],
+      "owner": "codex+human"
+    },
+    {
+      "id": "P1-PRISM-UI",
+      "title": "Aurora Glass light/dark command center and operations workbench",
+      "state": "CODE_COMPLETE",
+      "reason": "Source and browser tests under CI; visual acceptance by owner pending",
       "evidence": [],
       "owner": "codex+human"
     }
