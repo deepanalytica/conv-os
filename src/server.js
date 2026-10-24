@@ -188,7 +188,7 @@ export function createServer(){
    const file=path==='/'?(session?'index.html':'login.html'):path.slice(1);
    if(!session&&!['login.html','login.js','login.css','favicon.svg'].includes(file))
     return json(res,401,{error:'Acceso privado: inicia sesión'});
-   const allowed=/^(?:index\.html|login\.html|login\.js|login\.css|app\.js|crm-ui\.js|crm-ui\.css|styles\.css|premium\.css|theme\.css|theme\.js|favicon\.svg|landing\/(?:index\.html|landing\.css|landing\.js)|assets\/[a-z0-9_-]+\.svg)$/;
+   const allowed=/^(?:index\.html|login\.html|login\.js|login\.css|app\.js|crm-ui\.js|commercial-ui\.js|crm-ui\.css|styles\.css|premium\.css|theme\.css|theme\.js|favicon\.svg|landing\/(?:index\.html|landing\.css|landing\.js)|assets\/[a-z0-9_-]+\.svg)$/;
    if(!allowed.test(file))return json(res,404,{error:'Archivo no encontrado'});
    const bytes=readFileSync(join(staticDir,file));
    res.writeHead(200,{'content-type':types[extname(file)]||'application/octet-stream','cache-control':'no-cache'});
