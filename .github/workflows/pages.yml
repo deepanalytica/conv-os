@@ -5,6 +5,7 @@ on:
     paths:
       - 'public/**'
       - '.github/workflows/pages.yml'
+      - 'scripts/bolso-magnetico-smoke.mjs'
   workflow_dispatch:
 permissions:
   contents: read
