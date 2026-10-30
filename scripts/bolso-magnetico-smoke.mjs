@@ -40,6 +40,13 @@ try{
   await page.keyboard.press('Escape');
   assert.equal(await page.locator('#order-dialog').getAttribute('aria-hidden'),'true');
   const sizes=await page.evaluate(()=>({document:document.documentElement.scrollWidth,screen:window.innerWidth}));
+  if(sizes.document>sizes.screen+3){
+   const offenders=await page.evaluate(()=>[...document.querySelectorAll('body *')].filter(el=>{
+    const r=el.getBoundingClientRect();if(r.right<=innerWidth+2||r.width===0)return false;
+    let p=el.parentElement;while(p&&p!==document.body){const o=getComputedStyle(p).overflowX;if(o==='hidden'||o==='clip')return false;p=p.parentElement;}return true;
+   }).slice(0,16).map(el=>({tag:el.tagName,className:String(el.className).slice(0,65),right:Math.round(el.getBoundingClientRect().right),width:Math.round(el.getBoundingClientRect().width)})));
+   console.error('MOBILE_OVERFLOW_DEBUG',JSON.stringify(offenders));
+  }
   assert.ok(sizes.document<=sizes.screen+3,'Horizontal overflow: '+JSON.stringify(sizes));
   assert.deepEqual(backend,[]);
   assert.deepEqual(errors,[]);
