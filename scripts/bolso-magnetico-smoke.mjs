@@ -25,7 +25,7 @@ try{
   assert.equal(response.status(),200);
   await page.locator('.hero-bag').waitFor();
   assert.ok(await page.locator('.hero-purchase-btn').isVisible());
-  assert.match(await page.title(),/PISO\\/CERO/);
+  assert.ok((await page.title()).includes('PISO/CERO'));
   assert.equal(await page.locator('meta[name="robots"]').getAttribute('content'),'noindex,nofollow');
   assert.ok(await page.locator('.hero-bag').evaluate(el=>el.complete&&el.naturalWidth>0),'Product concept image missing');
   await page.locator('[data-view="detalle"]').click();
