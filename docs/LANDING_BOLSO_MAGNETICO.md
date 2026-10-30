@@ -9,7 +9,7 @@ python -m http.server 8787 -d public
 # http://localhost:8787/bolso-magnetico/
 ```
 
-Archivos: `public/bolso-magnetico/index.html` y `public/bolso-magnetico/assets/producto-conceptual.svg`. Funciona en cualquier servidor estático; no necesita dependencias ni backend.
+Archivos: `public/bolso-magnetico/index.html` (HTML/CSS/JS autónomo) y `public/bolso-magnetico/assets/producto-conceptual.svg`. Funciona en cualquier servidor estático; no necesita dependencias ni backend.
 
 ## Activar venta sin prometer cosas no verificadas
 
@@ -33,3 +33,11 @@ Archivos: `public/bolso-magnetico/index.html` y `public/bolso-magnetico/assets/p
 - Abrir el diálogo, cambiar cantidad y región, copiar mensaje y comprobar subtotal.
 - Configurar un número de prueba **de titularidad propia** y verificar que `wa.me` apunta al destinatario correcto sin credenciales expuestas.
 - Verificar imágenes en móvil, enlaces, FAQ y navegación por teclado.
+## Mejoras de conversión v0.2
+
+- Primer pantallazo: situación concreta, beneficio, precio **referencial** y CTA `QUIERO EL MÍO`.
+- Oferta y selector de cantidad inmediatamente después de la introducción; CTA fijo en móvil.
+- Recorrido problema → producto → beneficios → uso → dudas → nueva llamada a la acción.
+- Se evita crear estrellas, testimonios, stock escaso, descuentos o pagos ficticios.
+- KPI sugerido tras habilitar analítica consentida: visitas únicas, clic CTA, solicitudes a WhatsApp, pedidos confirmados, entregados y margen real por entregado. No confundir clics con ventas.
+- Para convertir realmente pedidos: verificar SKU y costos Dropi, fotografías del SKU, teléfono WhatsApp y despacho. La versión actual **no permite pagar**.
