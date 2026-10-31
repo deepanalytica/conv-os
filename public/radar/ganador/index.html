@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#070e17">
+<meta name="description" content="Radar Ganador Deep: evaluación trazable de productos para dropshipping en Chile. Diez señales, evidencia y rentabilidad.">
+<title>Radar Ganador Deep — Inteligencia de producto</title>
+<link rel="stylesheet" href="./style.css">
+<script defer src="./winner-core.js"></script>
+<script defer src="./app.js"></script>
+</head>
+<body>
+<div class="mobile-header"><strong>◉ DEEP <span style="color:#6ef1b5">GANADOR</span></strong><a class="link" href="../">← Radar principal</a></div>
+<div class="layout">
+<aside class="sidebar" aria-label="Lista de productos">
+<a class="brand" href="../"><span class="brand-icon">◈</span><span><b>RADAR <span>GANADOR</span></b><small>DEEP ANALYTICA · CHILE</small></span></a>
+<a class="btn flat" href="../">← Volver al radar general</a>
+<div class="side-label">PRODUCTOS EN EVALUACIÓN</div>
+<input class="search" type="search" id="search" aria-label="Buscar producto" placeholder="Buscar por nombre o SKU…">
+<button class="btn primary" id="addBtn">+ Registrar producto</button>
+<div class="list" id="productList"></div>
+<div class="sidebar-foot">Motor local · Sin suscripción ni acceso privado a Dropi.<br><br>Datos guardados en este navegador. Exporta respaldos regularmente.</div>
+</aside>
+<main class="main">
+<div class="topbar"><div class="breadcrumb">DEEP ANALYTICA / INTELIGENCIA / <strong>RADAR GANADOR</strong></div><div class="row"><button class="btn small flat" id="loadExample">Ejemplo: aceite de batana</button><button class="btn small" id="exportBtn">↓ Exportar evaluación</button></div></div>
+<div id="workspace" aria-live="polite"></div>
+</main>
+<aside class="right" aria-label="Resultado y riesgos"><div id="result"></div></aside>
+</div>
+<dialog id="productDialog" aria-labelledby="dialogTitle">
+<div class="dialog-head"><div><div class="micro">NUEVO CANDIDATO</div><h2 id="dialogTitle" style="margin:7px 0 0">Registrar producto</h2></div><button type="button" class="btn flat small" id="closeDialog">✕</button></div>
+<form id="newProductForm">
+<div class="dialog-body"><div class="form-grid">
+<div class="field wide"><label for="newName">Producto *</label><input id="newName" name="name" required maxlength="140" placeholder="Ej.: organizador plegable para vehículo"></div>
+<div class="field wide"><label for="newProblem">Problema específico que resuelve</label><textarea id="newProblem" name="problem" maxlength="1000" placeholder="Problema, contexto y comprador…"></textarea></div>
+<div class="field"><label for="newPrice">Precio de venta (CLP)</label><input id="newPrice" name="price" type="number" min="0" step="1" value="0"></div>
+<div class="field"><label for="newCost">Costo proveedor (CLP)</label><input id="newCost" name="cost" type="number" min="0" step="1" value="0"></div>
+<div class="field"><label for="newSku">SKU / Dropi ID</label><input id="newSku" name="sku" maxlength="80"></div>
+<div class="field"><label for="newSource">Proveedor</label><input id="newSource" name="source" maxlength="150" placeholder="Dropi, otro…"></div>
+</div><p class="footnote">Los datos no se envían al servidor. Luego podrás completar evidencia, costos y controles de riesgo.</p></div>
+<div class="dialog-foot"><button class="btn flat" type="button" id="cancelDialog">Cancelar</button><button class="btn primary" type="submit">Crear candidato</button></div>
+</form>
+</dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+</body></html>
