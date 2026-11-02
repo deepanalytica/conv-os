@@ -20,3 +20,12 @@ Leer README, PRD, ARCHITECTURE y DESIGN_SYSTEM antes de cambiar código. Este re
 
 ## Definición de terminado
 Código validado, pruebas verdes, aislamiento y seguridad revisados, UI responsiva verificada, modo demo explícito y documentación actualizada.
+
+## Invariantes de la instalación local
+- No permitir `HOST` distinto de `127.0.0.1` ni publicar el panel por túneles o proxies.
+- APIs protegidas con sesión HttpOnly y CSRF. Prohibido restablecer el token compartido de prueba.
+- Exclusión de Git para `.local/`, `data/` y `backups/`; nunca registrar claves, números reales o credenciales.
+- Receptor Meta deshabilitado por defecto. Las conexiones oficiales requieren OAuth, consentimiento y pruebas de enrutamiento por cuenta.
+- Los seguimientos son tareas internas, nunca mensajes salientes automáticos.
+- `won` en CRM es valor estimado; no representa pago o ingreso verificado.
+- Cambios en seguridad: añadir pruebas negativas de autenticación, origen, aislamiento y filtración de datos.

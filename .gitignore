@@ -6,3 +6,8 @@ data/*.sqlite-*
 node_modules/
 .DS_Store
 coverage/
+
+# Cuenta privada, credenciales locales y respaldos
+.local/
+backups/
+*.convbak

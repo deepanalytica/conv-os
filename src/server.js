@@ -5,18 +5,23 @@ import { resolve, dirname, join, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomUUID, createHmac, timingSafeEqual } from 'node:crypto';
 import { assertTransition, totalInCents, deliveryFee } from './domain.js';
+import {initCrm,seedCrmDemo,handleCrm} from './crm.js';
+import {initFollowups,handleFollowups} from './followups.js';
+import {getLocalPasswordHash,isLoopback,isLocalHost,allowedOrigin,currentSession,startSession,makeSessionCookie,clearSessionCookie,endSession,validCsrf} from './security.js';
 
 const root=resolve(fileURLToPath(new URL('../',import.meta.url)));
 const staticDir=join(root,'public');
 const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml'};
 const demo=process.env.DEMO_MODE!=='false' && process.env.NODE_ENV!=='production';
-const apiToken=process.env.ADMIN_TOKEN || (demo?'local-demo-token':null);
+// Nunca aceptar tokens de demostración como autorización para datos locales.
+const localAuthHash=getLocalPasswordHash();
 const equal=(a,b)=>{const x=Buffer.from(String(a||'')),y=Buffer.from(String(b||''));return x.length===y.length&&timingSafeEqual(x,y)};
 const json=(res,status,payload)=>{res.writeHead(status,{'content-type':'application/json; charset=utf-8','cache-control':'no-store'});res.end(JSON.stringify(payload))};
 const dbPath=process.env.DB_PATH||join(root,'data','ops.sqlite');
 if(dbPath!==':memory:')mkdirSync(dirname(dbPath),{recursive:true});
 export const db=new DatabaseSync(dbPath);
 db.exec(`PRAGMA foreign_keys=ON;
+PRAGMA journal_mode=WAL;
 CREATE TABLE IF NOT EXISTS tenants (id TEXT PRIMARY KEY,name TEXT NOT NULL,segment TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS products (id TEXT NOT NULL,tenant_id TEXT NOT NULL REFERENCES tenants(id),name TEXT NOT NULL,price_cents INTEGER NOT NULL,available INTEGER NOT NULL DEFAULT 1,PRIMARY KEY (id,tenant_id));
 CREATE TABLE IF NOT EXISTS orders (id TEXT PRIMARY KEY,tenant_id TEXT NOT NULL REFERENCES tenants(id),status TEXT NOT NULL,items TEXT NOT NULL,total_cents INTEGER NOT NULL,customer TEXT NOT NULL,created_at TEXT NOT NULL,verified_at TEXT);
@@ -34,6 +39,22 @@ if(db.prepare('SELECT COUNT(*) AS n FROM tenants').get().n===0){
  ['p1','demo-distribution','Caja de insumos',1299000],['p2','demo-distribution','Paquete mayorista',4999000]
  ])item.run(...p);
 }
+// Los negocios reales del usuario se incorporan como espacios de DEMOSTRACIÓN.
+// No quedan habilitados para operar con clientes hasta instalar identidad y RBAC.
+for(const [id,name,segment] of [
+ ['demo-wal','WAL · Regalos personalizados','retail'],
+ ['demo-vaa','Visual Art AI','services']
+])db.prepare('INSERT OR IGNORE INTO tenants VALUES (?,?,?)').run(id,name,segment);
+for(const [tenant,id,name,price] of [
+ ['demo-wal','mug','Tazón personalizado',1999000],
+ ['demo-wal','gift-pack','Pack de regalo',6999000],
+ ['demo-vaa','audit','Diagnóstico de presencia digital',15000000],
+ ['demo-vaa','automation','Automatización comercial',35000000]
+])db.prepare('INSERT OR IGNORE INTO products(id,tenant_id,name,price_cents,available) VALUES (?,?,?,?,1)').run(id,tenant,name,price);
+initCrm(db);
+initFollowups(db);
+if(demo)seedCrmDemo(db);
+
 function tenantRequired(req){
  const id=String(req.headers['x-tenant-id']||'');
  if(!db.prepare('SELECT id FROM tenants WHERE id=?').get(id))throw Object.assign(Error('Empresa inválida'),{status:400});
@@ -57,17 +78,51 @@ export function createServer(){
   res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('X-Frame-Options','DENY');
   res.setHeader('Referrer-Policy','no-referrer');res.setHeader('Permissions-Policy','camera=(),microphone=(),geolocation=()');
   res.setHeader('Content-Security-Policy',"default-src 'self'; connect-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self'; object-src 'none'; frame-ancestors 'none'");
-  const url=new URL(req.url||'/',`http://${req.headers.host||'localhost'}`);
+  // La aplicación es local-only. Un proxy público o un Host arbitrario se rechaza.
+  if(!isLoopback(req.socket.remoteAddress)||!isLocalHost(req.headers.host)){
+   return json(res,403,{error:'Solo se permite acceso desde esta computadora'});
+  }
+  if(!['GET','HEAD','OPTIONS'].includes(req.method)&&!allowedOrigin(req)){
+   return json(res,403,{error:'Origen no autorizado'});
+  }
+  // Un request-target o Host malformado nunca debe terminar el proceso.
+  if(!String(req.url||'').startsWith('/'))return json(res,400,{error:'Ruta inválida'});
+  let url;
+  try{url=new URL(req.url||'/',`http://${req.headers.host}`)}
+  catch{return json(res,400,{error:'Dirección inválida'})}
   const path=url.pathname;
   try {
+   if(path==='/api/auth/login'&&req.method==='POST'){
+    if(req.headers['x-convos-login']!=='1'||!String(req.headers['content-type']||'').startsWith('application/json'))
+     return json(res,403,{error:'Solicitud de inicio de sesión no permitida'});
+    const body=checkedJson(await limited(req,2048));
+    const result=startSession(body.password,localAuthHash);
+    if(result.status!==200)return json(res,result.status,{error:result.error});
+    res.setHeader('Set-Cookie',makeSessionCookie(result.token));
+    return json(res,200,{ok:true});
+   }
+   if(path==='/api/auth/session'&&req.method==='GET'){
+    const session=currentSession(req);
+    if(!session)return json(res,401,{authenticated:false,configured:!!localAuthHash});
+    return json(res,200,{authenticated:true,role:'local_owner',csrf:session.csrf});
+   }
+   if(path==='/api/auth/logout'&&req.method==='POST'){
+    const session=currentSession(req);
+    if(!session||!validCsrf(req,session))return json(res,403,{error:'Sesión o CSRF inválidos'});
+    endSession(req);res.setHeader('Set-Cookie',clearSessionCookie());
+    return json(res,200,{ok:true});
+   }
    if(path==='/api/health'&&req.method==='GET')return json(res,200,{ok:true,mode:demo?'demo':'restricted',storage:'sqlite',service:'conv-os'});
    if(path==='/api/meta/webhook'&&req.method==='GET'){
+    if(process.env.ENABLE_META_WEBHOOKS!=='true')return json(res,503,{error:'Integración Meta deshabilitada'});
     const valid=process.env.META_VERIFY_TOKEN&&equal(url.searchParams.get('hub.verify_token'),process.env.META_VERIFY_TOKEN)&&url.searchParams.get('hub.mode')==='subscribe';
     if(!valid)return json(res,403,{error:'Verificación fallida'});
     res.writeHead(200,{'content-type':'text/plain'});return res.end(url.searchParams.get('hub.challenge')||'');
    }
    if(path==='/api/meta/webhook'&&req.method==='POST'){
-    if(!process.env.META_APP_SECRET||!process.env.META_TENANT_ID)return json(res,503,{error:'Meta no configurado'});
+    if(process.env.ENABLE_META_WEBHOOKS!=='true')return json(res,503,{error:'Integración Meta deshabilitada'});
+    if(!process.env.META_APP_SECRET||!process.env.META_TENANT_ID||!process.env.META_PHONE_NUMBER_ID)
+     return json(res,503,{error:'Meta no configurado con identificador de número'});
     const raw=await limited(req,1024*1024);
     const expected='sha256='+createHmac('sha256',process.env.META_APP_SECRET).update(raw).digest('hex');
     if(!equal(expected,req.headers['x-hub-signature-256']))return json(res,401,{error:'Firma inválida'});
@@ -81,9 +136,14 @@ export function createServer(){
     return json(res,200,{received:true});
    }
    if(path.startsWith('/api/')){
-    if(!apiToken||!equal(req.headers.authorization,`Bearer ${apiToken}`))return json(res,401,{error:'Autenticación requerida'});
+    const session=currentSession(req);
+    if(!session)return json(res,401,{error:'Autenticación requerida'});
+    if(!['GET','HEAD'].includes(req.method)&&!validCsrf(req,session))
+     return json(res,403,{error:'Protección CSRF: actualización rechazada'});
     if(path==='/api/tenants'&&req.method==='GET')return json(res,200,{tenants:db.prepare('SELECT * FROM tenants').all()});
     const tenant=tenantRequired(req);
+    if(await handleCrm({db,req,res,path,tenant,json,limited,checkedJson}))return;
+    if(await handleFollowups({db,req,res,path,tenant,json,limited,checkedJson}))return;
     if(path==='/api/overview'&&req.method==='GET'){
      const count=db.prepare("SELECT status,COUNT(*) n FROM orders WHERE tenant_id=? GROUP BY status").all(tenant);
      const sales=db.prepare("SELECT COALESCE(SUM(total_cents),0) v FROM orders WHERE tenant_id=? AND verified_at IS NOT NULL").get(tenant);
@@ -121,8 +181,12 @@ export function createServer(){
     return json(res,404,{error:'API no encontrada'});
    }
    if(!['GET','HEAD'].includes(req.method))return json(res,405,{error:'Método no permitido'});
-   const file=path==='/'?'index.html':path.slice(1);
-   if(!['index.html','app.js','styles.css','favicon.svg'].includes(file))return json(res,404,{error:'Archivo no encontrado'});
+   const session=currentSession(req);
+   const file=path==='/'?(session?'index.html':'login.html'):path.slice(1);
+   if(!session&&!['login.html','login.js','login.css','favicon.svg'].includes(file))
+    return json(res,401,{error:'Acceso privado: inicia sesión'});
+   const allowed=/^(?:index\.html|login\.html|login\.js|login\.css|app\.js|crm-ui\.js|crm-ui\.css|styles\.css|premium\.css|theme\.css|theme\.js|favicon\.svg|landing\/(?:index\.html|landing\.css|landing\.js)|assets\/[a-z0-9_-]+\.svg)$/;
+   if(!allowed.test(file))return json(res,404,{error:'Archivo no encontrado'});
    const bytes=readFileSync(join(staticDir,file));
    res.writeHead(200,{'content-type':types[extname(file)]||'application/octet-stream','cache-control':'no-cache'});
    return res.end(req.method==='HEAD'?undefined:bytes);
@@ -135,7 +199,8 @@ export function createServer(){
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
  const host=process.env.HOST||'127.0.0.1',port=Number(process.env.PORT||4173);
- if(host!=='127.0.0.1'&&!process.env.ADMIN_TOKEN)throw Error('Se requiere ADMIN_TOKEN para escuchar fuera de localhost');
+ if(host!=='127.0.0.1')throw Error('Seguridad: solo se permite HOST=127.0.0.1');
+ if(!localAuthHash)throw Error('Acceso sin configurar. Ejecuta npm run setup:local antes de iniciar el servidor.');
  if(process.env.NODE_ENV==='production')throw Error('MVP no autorizado para producción con pagos reales');
  createServer().listen(port,host,()=>console.log(`Conversation Ops local http://${host}:${port}`));
 }

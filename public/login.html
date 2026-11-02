@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer">
+<title>Acceso privado · Conversation Ops</title>
+<link rel="icon" href="./favicon.svg"><link rel="stylesheet" href="./login.css">
+</head>
+<body>
+<main class="login-shell">
+ <section class="login-card" aria-labelledby="title">
+  <span class="overline">◈ CONVERSATION OPS / PRIVATE WORKSPACE</span>
+  <div class="lock" aria-hidden="true">◈</div>
+  <h1 id="title">Centro de operaciones privado</h1>
+  <p>WAL y Visual Art AI, desde esta computadora. Ningún canal real está conectado.</p>
+  <form id="login-form">
+   <label for="password">Contraseña del propietario</label>
+   <input type="password" name="password" id="password" minlength="14" maxlength="256" autocomplete="current-password" required autofocus>
+   <button type="submit" id="submit">Acceder al sistema <span>↗</span></button>
+   <p id="login-status" role="status" aria-live="polite"></p>
+  </form>
+  <div class="login-footer">ACCESO LOCAL · 127.0.0.1 · Sesión privada<br>Si aún no existe una cuenta, ejecuta <code>npm run setup:local</code> en la carpeta del proyecto.</div>
+ </section>
+</main>
+<script src="./login.js" defer></script>
+</body></html>
