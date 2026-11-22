@@ -44,6 +44,11 @@ jobs:
           # Publish the standalone noindex product landing independently from the pinned frontend.
           git archive origin/main public/bolso-magnetico | tar -x -C _site --strip-components=1
           test -f _site/radar/index.html
+          test -f _site/radar/mercado/index.html
+          test -f _site/radar/mercado/engine.js
+          test -f _site/radar/mercado/app.js
+          node --check _site/radar/mercado/engine.js
+          node --check _site/radar/mercado/app.js
           test -f _site/bolso-magnetico/index.html
           test -f _site/bolso-magnetico/assets/producto-conceptual.svg
           rm -f _site/login.html _site/login.js _site/login.css
