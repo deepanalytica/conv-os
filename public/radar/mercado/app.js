@@ -108,6 +108,7 @@ function render(){
  }
  details();
  const form=$('calcForm');
+ form.reset();
  const saved=scenarios[selected]||null;
  if(saved){for(const [key,value] of Object.entries(saved)){const input=form.elements.namedItem(key);if(input&&'value'in input)input.value=value;}}
  $('calcResult').replaceChildren();
@@ -144,7 +145,7 @@ $('demoBtn').addEventListener('click',()=>{
 });
 $('exportBtn').addEventListener('click',()=>{
  if(!store.items.length){say('No hay observaciones que exportar.');return;}
- const esc=x=>'"'+String(x??'').replace(/"/g,'""').replace(/^[=+\-@\t\r]/,"'$&")+'"';
+ const esc=x=>'"'+String(x??'').replace(/"/g,'""').replace(/^[=+@\t\r]/,"'$&")+'"';
  const lines=['date,product_id,supplier_id,stock,name,source_url',...store.items.map(x=>[x.date,x.product_id,x.supplier_id,x.stock,x.name,x.source_url].map(esc).join(','))];
  download(lines.join('\n')+'\n','radar_observaciones_'+new Date().toISOString().slice(0,10)+(store.source==='DEMO'?'_DEMO':'')+'.csv','text/csv;charset=utf-8');
 });
