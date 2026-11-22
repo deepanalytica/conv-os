@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0c1623"><meta name="robots" content="noindex,nofollow">
+<title>Deep Radar | Inteligencia de mercado</title>
+<style>
+:root{color-scheme:dark;--bg:#080e17;--panel:#101b29;--panel2:#172536;--ink:#edf4fb;--muted:#93a6bb;--line:#293b4b;--aqua:#6bd8d0;--gold:#e9bc77;--red:#ffa69d}*{box-sizing:border-box}html{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}body{margin:0;background:radial-gradient(circle at 84% -12%,#183a4b 0,transparent 40%),var(--bg);color:var(--ink);min-height:100vh}a{color:var(--aqua)}button,input{font:inherit}button{cursor:pointer;border-radius:9px;border:1px solid #3c5969;color:var(--ink);background:#1a3040;padding:10px 14px}button.primary{background:var(--aqua);color:#03272b;border-color:var(--aqua);font-weight:750}button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:2px}.wrap{max-width:1410px;padding:24px;margin:auto}.top{display:flex;align-items:center;justify-content:space-between;gap:18px}.mark{font-weight:850;letter-spacing:1px}.mark span{color:var(--aqua)}.muted{color:var(--muted)}.eyebrow{font-size:11px;letter-spacing:2px;font-weight:800;color:var(--aqua)}h1{font-size:clamp(28px,4.4vw,48px);letter-spacing:-1.7px;margin:10px 0}p{line-height:1.6}.lead{color:var(--muted);max-width:820px;margin-bottom:23px}.panel{background:linear-gradient(150deg,var(--panel),#0e1724);border:1px solid var(--line);border-radius:15px;padding:20px}.note{background:#30291b;border:1px solid #665232;border-radius:10px;padding:12px 16px;color:#e8c995;margin:16px 0}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:18px 0}.file-btn{display:inline-flex;gap:8px;align-items:center;cursor:pointer;padding:10px 14px;border:1px solid #3c5969;border-radius:9px;background:#1a3040}.file-btn input{position:absolute;width:1px;height:1px;opacity:0}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:18px 0}.stat{padding:16px;border:1px solid var(--line);border-radius:13px;background:var(--panel)}.stat small{color:var(--muted);display:block}.stat strong{display:block;font-size:25px;margin-top:8px}.cols{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;align-items:start}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:620px;font-size:13px}th{text-align:left;color:var(--muted);font-size:11px;padding:13px 9px}td{border-top:1px solid var(--line);padding:13px 9px}tr[role=button]{cursor:pointer}tr[role=button]:hover,tr.selected{background:#193443}.tag{display:inline-block;border-radius:8px;padding:5px 8px;font-size:11px;font-weight:700;background:#273444;color:#b7dce0}.tag.warn{background:#45301f;color:#f0c28d}.tag.good{background:#153d37;color:#79e6c8}.section-title{font-size:14px;margin:0 0 15px}.detailname{font-size:23px;letter-spacing:-.5px;line-height:1.2;margin:8px 0 5px;overflow-wrap:anywhere}.small{font-size:12px}.minirow{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid #263744}.minirow:last-child{border-bottom:0}.chart{width:100%;height:150px;background:#101f2d;border:1px solid var(--line);border-radius:10px;margin:12px 0}label.field{display:flex;flex-direction:column;gap:6px;color:var(--muted);font-size:12px}input[type=number]{width:100%;min-width:0;background:#121f2e;color:var(--ink);border:1px solid #3b5164;border-radius:8px;padding:10px}.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.result{background:#112f30;border:1px solid #3c6961;border-radius:10px;margin-top:15px;padding:15px}.result strong{font-size:24px}.result.bad{background:#38231f;border-color:#7a4b40}.empty{padding:35px;text-align:center;color:var(--muted)}.footer{font-size:12px;color:#8699a8;margin:30px 0 20px}#message{font-size:13px;color:#e8c995;min-height:20px}#sourceList a{word-break:break-word}svg{display:block}.row-head{display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap}.row-head h2{margin:0;font-size:16px}.risk{color:var(--red)}.visually-hidden{position:absolute;width:1px;height:1px;clip:rect(0,0,0,0);overflow:hidden}@media(max-width:860px){.cols{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.wrap{padding:16px}}@media(max-width:420px){.stats{grid-template-columns:1fr 1fr}.stat strong{font-size:20px}.fields{grid-template-columns:1fr 1fr}}
+</style>
+<script defer src="./engine.js"></script><script defer src="./app.js"></script>
+</head>
+<body><div class="wrap">
+<header class="top"><div class="mark">◈ DEEP <span>RADAR / MARKET INTEL</span></div><a href="../">Volver al radar</a></header>
+<div class="eyebrow" style="margin-top:33px">INVESTIGACIÓN · CHILE · V0.2</div>
+<h1>Detecta señales antes de invertir.</h1>
+<p class="lead">Analiza historiales diarios de inventario de proveedores obtenidos con permiso. Detecta caídas, reposiciones, picos aislados y variaciones de ritmo. Después evalúa el margen realista de pago contra entrega (COD) para decidir qué investigar.</p>
+<div class="note"><strong>Regla de evidencia:</strong> caída de inventario ≠ venta confirmada. No hay conexión automática con Dropi ni datos privados. Un anuncio activo tampoco demuestra conversiones. Nunca se marca un producto como «ganador» sin ventas entregadas verificadas.</div>
+<section class="toolbar" aria-label="Acciones de datos">
+<label class="file-btn" tabindex="0">↑ Importar CSV de inventario<input id="fileInput" type="file" accept=".csv,text/csv" aria-label="Importar CSV"></label>
+<button type="button" id="demoBtn">Cargar datos DEMO</button>
+<button type="button" id="templateBtn">↓ Plantilla CSV</button>
+<button type="button" id="exportBtn">↓ Exportar observaciones</button>
+<button type="button" id="clearBtn">Borrar datos locales</button>
+</section>
+<div id="message" role="status" aria-live="polite"></div>
+<div class="stats" aria-label="Resumen de la muestra">
+<div class="stat"><small>Productos / proveedor</small><strong id="countProducts">—</strong></div>
+<div class="stat"><small>Observaciones diarias</small><strong id="countObservations">—</strong></div>
+<div class="stat"><small>Señales evaluables</small><strong id="countEvaluable">—</strong></div>
+<div class="stat"><small>Origen</small><strong id="datasetType">Sin datos</strong></div>
+</div>
+<div class="cols">
+<section class="panel">
+<div class="row-head"><h2>Radar de actividad</h2><span class="muted small">Score experimental · no probabilidad de vender</span></div>
+<p class="muted small">Puntuación con cobertura documental, continuidad y penalización de picos. Compara candidatos, no estima pedidos realizados.</p>
+<div class="tablewrap"><table><thead><tr><th>Producto</th><th>Inventario ↓ / 7d</th><th>14d</th><th>Confianza</th><th>Score</th><th>Lectura</th></tr></thead><tbody id="rows"><tr><td colspan="6" class="empty">Importa observaciones o carga el ejemplo claramente marcado DEMO.</td></tr></tbody></table></div>
+</section>
+<div>
+<section class="panel" id="details">
+<h2 class="section-title">Ficha de producto</h2><div class="empty">Selecciona una fila para revisar historial y calidad de los datos.</div>
+</section>
+<section class="panel" style="margin-top:16px">
+<div class="row-head"><h2>Simulador COD — Chile</h2><span class="tag warn">Supuestos manuales</span></div>
+<p class="muted small">Costo publicitario por <strong>pedido captado</strong>, no por entrega. La pérdida de rechazos se reparte entre pedidos que sí llegan. No sustituye contabilidad ni IVA real.</p>
+<form id="calcForm"><div class="fields">
+<label class="field">Precio venta CLP<input name="price" inputmode="numeric" type="number" min="1" step="1" placeholder="Dato real" required></label>
+<label class="field">Costo proveedor<input name="cost" inputmode="numeric" type="number" min="1" step="1" placeholder="Dato real" required></label>
+<label class="field">Despacho por entrega<input name="shipping" inputmode="numeric" type="number" min="0" step="1" value="0"></label>
+<label class="field">Otros cargos por entrega<input name="fee" inputmode="numeric" type="number" min="0" step="1" value="0"></label>
+<label class="field">Publicidad por pedido captado<input name="cpaPerOrder" inputmode="numeric" type="number" min="0" step="1" value="0"></label>
+<label class="field">Costo por pedido no entregado<input name="rejectCost" inputmode="numeric" type="number" min="0" step="1" value="0"></label>
+<label class="field">Tasa efectiva de entrega %<input name="deliveryPct" inputmode="numeric" type="number" min="1" max="100" step="1" value="75"></label>
+<label class="field">Reserva tributaria / otros por entrega<input name="reserve" inputmode="numeric" type="number" min="0" step="1" value="0"></label>
+<label class="field">Meta por entrega CLP<input name="target" inputmode="numeric" type="number" min="0" step="1" value="10000"></label>
+</div><button type="submit" class="primary" style="margin-top:14px">Calcular contribución</button></form>
+<div id="calcResult" role="status" aria-live="polite"></div>
+</section>
+</div></div>
+<footer class="footer">Herramienta local: las importaciones quedan únicamente en este navegador, sin sincronización ni scraping. No importar datos personales. Respaldar antes de borrar. <a href="https://www.dropdata.app/como-funciona" target="_blank" rel="noopener noreferrer">Benchmark público Dropdata</a> · <a href="../ganador/">Radar Ganador Deep</a>.</footer>
+</div></body></html>
